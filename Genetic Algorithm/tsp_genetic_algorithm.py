@@ -4,6 +4,7 @@
 # set km as the unit
 # set one agent (robot)
 # set its position on the map
+# create a more sexy gui with every type of methods
 
 import numpy as np
 import matplotlib.pyplot as plt
