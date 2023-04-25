@@ -4,7 +4,7 @@
 # set km as the unit
 # set one agent (robot)
 # set its position on the map
-# create a more sexy gui with every type of method
+# create a more sexy gui with every type of method --> FOLLOW what i did with simple grid
 
 import numpy as np
 import matplotlib.pyplot as plt
