@@ -10,4 +10,4 @@ python3 manage.py runserver
 # This is the file structure
 
 # This what to expect from the user interface
-![alt text](website.png "User Interface")
+![alt text](/TSPP/website.png "User Interface")
