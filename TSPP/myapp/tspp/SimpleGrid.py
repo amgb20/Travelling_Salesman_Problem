@@ -156,6 +156,11 @@ def plot_to_base64_image(plot):
     buf.close()
     return image_base64
 
+def path_coordinates_to_csv_string(path, coordinates):
+    ordered_path_coordinates = coordinates[path, :]
+    csv_data = "\n".join([f"{coord[0]},{coord[1]}" for coord in ordered_path_coordinates])
+    return csv_data
+
 # filename = "path.csv"
 
 # if filename:

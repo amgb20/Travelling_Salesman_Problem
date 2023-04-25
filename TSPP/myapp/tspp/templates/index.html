@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Travelling Salesman Problem Solver</title>
     {% load static %}
 </head>
+
 <body>
     <h2>Travelling Salesman Problem Solver</h2>
     <form method="post" action="">
@@ -13,15 +15,13 @@
     </form>
 
     {% if result %}
-        <h3>Results</h3>
-        <!-- Display the results as you need, assuming result is a tuple or list -->
-        <p>Cost: {{ result.1 }}</p>
-        <p>Elapsed Time: {{ result.2 }} seconds</p>
-        <p><img src="data:image/png;base64,{{ image_base64 }}" alt="Algorithm plot"></p>
-        <p><a href="{% static csv_filename %}" download>Download CSV</a></p>
+    <h3>Results</h3>
+    <!-- Display the results as you need, assuming result is a tuple or list -->
+    <p>Cost: {{ result.1 }}</p>
+    <p>Elapsed Time: {{ result.2 }} seconds</p>
+    <p><img src="data:image/png;base64,{{ image_base64 }}" alt="Algorithm plot"></p>
+    <p><a href="{% url 'download_csv' algorithm=algorithm Length=Length Width=Width %}" download="{{ csv_filename }}">Download CSV</a></p>
     {% endif %}
 </body>
+
 </html>
-
-
-
