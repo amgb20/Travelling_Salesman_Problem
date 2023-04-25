@@ -3,6 +3,8 @@ from .forms import TSPForm
 from . import SimpleGrid
 import numpy as np
 import itertools
+import io
+import base64
 
 from django.http import HttpResponse
 
@@ -41,6 +43,15 @@ def index(request):
             # Get the result and pass it to the template
             path, cost, elapsed_time, image_base64 = SimpleGrid.run(Length, Width, tspp_algorithm=algorithm)
             csv_filename = f"{algorithm}_path.csv"
+            
+            plt_complexity = SimpleGrid.run_experiments_and_save_plot()
+
+             # Convert the plt instance to a base64 image
+            buffer = io.BytesIO()
+            plt_complexity.savefig(buffer, format='png')
+            buffer.seek(0)
+            image_complexity = base64.b64encode(buffer.getvalue()).decode('utf-8')
+            context['complexity_plot_path'] = image_complexity
 
             context['result'] = (path, cost, elapsed_time)
             context['image_base64'] = image_base64
@@ -48,7 +59,6 @@ def index(request):
             context['Length'] = Length
             context['Width'] = Width
             context['csv_filename'] = f"{algorithm}_{Length}x{Width}.csv" 
-            # context = {'form':form, 'result': result, 'image_base64': image_base64, 'csv_filename': csv_filename}
         
     else:
         form = TSPForm()

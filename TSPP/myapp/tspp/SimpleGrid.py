@@ -4,10 +4,13 @@ import matplotlib.pyplot as plt
 from scipy.spatial import distance_matrix
 from scipy.spatial.distance import pdist, squareform
 from tsp_solver.greedy import solve_tsp
+from concurrent.futures import ThreadPoolExecutor, TimeoutError
 import time
 import os
+import csv
 import base64
 from io import BytesIO
+import matplotlib.pyplot as plt_instance
 
 # Function that create a timer to detect if the algorithm is taking too long
 
@@ -21,7 +24,6 @@ def end_clock(start_time):
     elapsed_time = time.time() - start_time
 
     return elapsed_time
-
 
 # Nearest Neighbor
 def nearest_neighbour(dist_matrix, start=0):
@@ -121,36 +123,68 @@ def run(length, width, tspp_algorithm):
     
     return path, cost, elapsed_time, image_base64
 
+def run_experiments_and_save_plot(max_grid_size=10):
+    grid_sizes = range(1, max_grid_size + 1)
+    elapsed_times = []
+
+    for size in grid_sizes:
+        _, _, elapsed_time, _ = run(size, size, tspp_algorithm='nn')
+        elapsed_times.append(elapsed_time)
+
+    plot_C = plot_complexity(grid_sizes, elapsed_times)
+
+    # image_complexity = plot_to_base64_image(plot_C)
+
+    # Save the results to a CSV file
+    with open('results.csv', 'w', newline='') as csvfile:
+        fieldnames = ['grid_size', 'elapsed_time']
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer.writeheader()
+        for i in range(len(grid_sizes)):
+            writer.writerow({'grid_size': grid_sizes[i], 'elapsed_time': elapsed_times[i]})
+
+    return plot_C
+
+# Plot time complexity
+def plot_complexity(grid_sizes, elapsed_times):
+    plot_C = plt.figure()
+    plt.plot(grid_sizes, elapsed_times, marker='o')
+    plt.xlabel('Grid size (NxN)')
+    plt.ylabel('Elapsed time (seconds)')
+    plt.title('Nearest Neighbor Algorithm Time Complexity')
+    plt.grid(True)
+
+    return plot_C
 
 # Plot paths
 def plot_path(path, title, color='blue', filename=None, coordinates=None):
-    plt.figure()
-    plt.scatter(coordinates[:, 0], coordinates[:, 1],
+    plot = plt_instance.figure()
+    plt_instance.scatter(coordinates[:, 0], coordinates[:, 1],
                 c='red', label='Waypoints')
    
     # place the robot at the optimal start
-    plt.scatter(coordinates[0, 0], coordinates[0, 1],
+    plt_instance.scatter(coordinates[0, 0], coordinates[0, 1],
                 c='yellow', marker='s', label='Robot')
-    plt.plot(coordinates[path, 0], coordinates[path, 1], c=color)
-    plt.title(title)
-    plt.xlabel("X")
-    plt.ylabel("Y")
-    plt.legend()
+    plt_instance.plot(coordinates[path, 0], coordinates[path, 1], c=color)
+    plt_instance.title(title)
+    plt_instance.xlabel("X")
+    plt_instance.ylabel("Y")
+    plt_instance.legend()
 
     # Number the points according to the order of the path
     for i, point in enumerate(path):
-        plt.annotate(
+        plt_instance.annotate(
             str(i), (coordinates[point, 0], coordinates[point, 1]), fontsize=8, ha='right')
 
     if filename:
         # save the 2D coordinates of the path to a csv file
         np.savetxt(filename, coordinates, delimiter=",")
     
-    return plt
+    return plot
 
-def plot_to_base64_image(plot):
+def plot_to_base64_image(image = None):
     buf = BytesIO()
-    plot.savefig(buf, format='png')
+    image.savefig(buf, format='png')
     buf.seek(0)
     image_base64 = base64.b64encode(buf.getvalue()).decode('utf-8')
     buf.close()

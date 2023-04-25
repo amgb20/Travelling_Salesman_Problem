@@ -91,8 +91,9 @@
     <h3>Results</h3>
     <!-- Display the results as you need, assuming result is a tuple or list -->
     <p>Cost: {{ result.1 }}</p>
-    <p>Elapsed Time: {{ result.2 }} seconds</p>
+    <p>Time to execute the function: {{ result.2 }} seconds</p>
     <p><img src="data:image/png;base64,{{ image_base64 }}" alt="Algorithm plot"></p>
+    <p><img src="data:image/png;base64,{{ complexity_plot_path }}" alt="Complexity plot"></p>
     <p><a href="{% url 'download_csv' algorithm=algorithm Length=Length Width=Width %}" download="{{ csv_filename }}">Download CSV</a></p>
     {% endif %}
 </body>
