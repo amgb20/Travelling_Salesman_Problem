@@ -5,6 +5,9 @@ from scipy.spatial import distance_matrix
 from scipy.spatial.distance import pdist, squareform
 from tsp_solver.greedy import solve_tsp
 import time
+import os
+import base64
+from io import BytesIO
 
 # Function that create a timer to detect if the algorithm is taking too long
 
@@ -107,27 +110,51 @@ def run(length, width, tspp_algorithm):
     # compute cost
     cost = sum(dist_matrix[path[i]][path[i + 1]] for i in range(len(path) - 1))
 
-    return path, cost, elapsed_time
+    # Create a plot filename
+    plot_filename = f"{tspp_algorithm}_{length}x{width}.png"
+
+    # Plot and save the image
+    plot = plot_path(path, f"{tspp_algorithm} (Optimal start: {optimal_start})", color='blue',
+              filename=f"{tspp_algorithm}_path.csv", coordinates=grid_points)
+    
+    image_base64 = plot_to_base64_image(plot)
+    
+    return path, cost, elapsed_time, image_base64
 
 
-# # Plot paths
-# def plot_path(path, title, color='blue', filename=None, coordinates=grid_points):
-#     plt.figure()
-#     plt.scatter(grid_points[:, 0], grid_points[:, 1], c='red')
-#     # plt.scatter(grid_points[1:, 0], grid_points[1:, 1], c='blue', label='Waypoints')
-#     plt.scatter(grid_points[0, 0], grid_points[nn_optimal_start, 1], c='yellow', marker='s', label='Robot') # place the robot at the optimal start
-#     plt.plot(grid_points[path, 0], grid_points[path, 1], c=color)
-#     plt.title(title)
-#     plt.xlabel("X")
-#     plt.ylabel("Y")
-#     plt.legend()
+# Plot paths
+def plot_path(path, title, color='blue', filename=None, coordinates=None):
+    plt.figure()
+    plt.scatter(coordinates[:, 0], coordinates[:, 1],
+                c='red', label='Waypoints')
+   
+    # place the robot at the optimal start
+    plt.scatter(coordinates[0, 0], coordinates[0, 1],
+                c='yellow', marker='s', label='Robot')
+    plt.plot(coordinates[path, 0], coordinates[path, 1], c=color)
+    plt.title(title)
+    plt.xlabel("X")
+    plt.ylabel("Y")
+    plt.legend()
 
-#     # Number the points according to the order of the path
-#     for i, point in enumerate(path):
-#         plt.annotate(str(i), (grid_points[point, 0], grid_points[point, 1]), fontsize=8, ha='right')
+    # Number the points according to the order of the path
+    for i, point in enumerate(path):
+        plt.annotate(
+            str(i), (coordinates[point, 0], coordinates[point, 1]), fontsize=8, ha='right')
 
-#     if filename:
-#         np.savetxt(filename, coordinates, delimiter=",") # save the 2D coordinates of the path to a csv file
+    if filename:
+        # save the 2D coordinates of the path to a csv file
+        np.savetxt(filename, coordinates, delimiter=",")
+    
+    return plt
+
+def plot_to_base64_image(plot):
+    buf = BytesIO()
+    plot.savefig(buf, format='png')
+    buf.seek(0)
+    image_base64 = base64.b64encode(buf.getvalue()).decode('utf-8')
+    buf.close()
+    return image_base64
 
 # filename = "path.csv"
 

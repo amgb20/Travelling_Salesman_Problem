@@ -9,6 +9,7 @@ from . import SimpleGrid
 def index(request):
     result = None
     form = TSPForm()
+    context = {}
 
     if request.method == 'POST':
         form = TSPForm(request.POST)
@@ -20,11 +21,19 @@ def index(request):
 
             # Call SimpleGrid functions with the selected algorithm and grid_size
             # Get the result and pass it to the template
-            result = SimpleGrid.run(Length, Width, tspp_algorithm=algorithm)
+            path, cost, elapsed_time, image_base64 = SimpleGrid.run(Length, Width, tspp_algorithm=algorithm)
+            csv_filename = f"{algorithm}_path.csv"
+
+            context['result'] = (path, cost, elapsed_time)
+            context['image_base64'] = image_base64
+            context['csv_filename'] = f"{algorithm}_{Length}x{Width}.csv" 
+            # context = {'form':form, 'result': result, 'image_base64': image_base64, 'csv_filename': csv_filename}
+        
     else:
         form = TSPForm()
-
-    return render(request, 'index.html', {'form':form, 'result': result})
+    
+    context['form'] = form
+    return render(request, 'index.html', context)
 
 # def result(request):
 #     if request.method == 'POST':
