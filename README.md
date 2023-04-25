@@ -6,3 +6,8 @@ Go into the TSPP/myapp directory and run
 ```bash
 python3 manage.py runserver
 ```
+
+# This is the file structure
+
+# This what to expect from the user interface
+![alt text](/Photos-ReadMe/website.png "User Interface")
