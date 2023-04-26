@@ -24,6 +24,7 @@ import time
 import os
 import csv
 import base64
+import psutil  # To get the number of cores
 
 from io import BytesIO
 from scipy.optimize import curve_fit
@@ -32,19 +33,31 @@ from scipy.spatial.distance import pdist, squareform
 from tsp_solver.greedy import solve_tsp
 from concurrent.futures import ThreadPoolExecutor, TimeoutError
 from . import tssp_algorithms
+from multiprocessing import Pool, cpu_count
 
 # Function that create a timer to detect if the algorithm is taking too long
 
 
 def start_clock():
-    start_time = time.time()
+    start_time = time.perf_counter()  # perf_counter() is the most precise clock
     return start_time
 
 
 def end_clock(start_time):
-    elapsed_time = time.time() - start_time
+    finish_time = time.perf_counter()
+    return finish_time
 
-    return elapsed_time
+#
+
+
+def cpu_start():
+    start_time = psutil.cpu_percent(interval=None)
+    return start_time
+
+
+def cpu_end():
+    finish_time = psutil.cpu_percent(interval=None)
+    return finish_time
 
 
 def find_optimal_start(dist_matrix, tsp_algorithm):
@@ -83,10 +96,13 @@ def run(length, width, tspp_algorithm):
     # find optimal starting position
     optimal_start = find_optimal_start(dist_matrix, algorithms[tspp_algorithm])
 
-    # solve, compare and compute elapsed time
+    # solve, compare and compute elapsed time and CPU time
     start = start_clock()
+    start_CPU = cpu_start()
     path = algorithms[tspp_algorithm](dist_matrix, optimal_start)
-    elapsed_time = end_clock(start)
+    end_CPU = cpu_end()
+    elapsed_time = end_clock(start) - start
+    cpu_percentages = end_CPU - start_CPU
 
     # compute cost
     cost = sum(dist_matrix[path[i]][path[i + 1]]
@@ -101,30 +117,66 @@ def run(length, width, tspp_algorithm):
 
     image_base64 = plot_to_base64_image(plot)
 
-    return path, cost, elapsed_time, image_base64
+    return path, cost, elapsed_time, image_base64, cpu_percentages
 
 
 def run_experiments_and_save_plot(number_of_points, tspp_algorithm):
     grid_sizes = range(1, number_of_points + 1)
     elapsed_times = []
+    cpu_usages = []
 
     for size in grid_sizes:
-        _, _, elapsed_time, _ = run(size, size, tspp_algorithm)
+        _, _, elapsed_time, _, cpu_usage = run(
+            size, size, tspp_algorithm)
         elapsed_times.append(elapsed_time)
+        cpu_usages.append(cpu_usage)  #  store the CPU usage
 
     plot_C = plot_complexity(grid_sizes, elapsed_times,
                              f"{tspp_algorithm}: Time complexity")
 
     # Save the results to a CSV file
     with open('results.csv', 'w', newline='') as csvfile:
-        fieldnames = ['grid_size', 'elapsed_time']
+        fieldnames = ['grid_size', 'elapsed_time', 'cpu_usage']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
         for i in range(len(grid_sizes)):
             writer.writerow(
-                {'grid_size': grid_sizes[i], 'elapsed_time': elapsed_times[i]})
+                {'grid_size': grid_sizes[i], 'elapsed_time': elapsed_times[i],'cpu_usage': cpu_usages[i]})
 
     return plot_C
+
+
+# def process_grid_size(args):
+#     size, tspp_algorithm = args
+#     _, _, elapsed_time, _ = run(size, size, tspp_algorithm)
+#     return elapsed_time
+
+# # function trying to use multiprocessing to run the experiments in parallel
+# def run_parallel_experiments(number_of_points, tspp_algorithm):
+#     grid_sizes = range(1, number_of_points + 1)
+#     elapsed_times = []
+
+#     # Set the number of processes to the minimum between the number of available CPU cores and a certain limit (e.g., 4).
+#     num_processes = min(cpu_count(), 4)
+
+#     with Pool(processes=num_processes) as pool:
+#         results = pool.map(process_grid_size, [
+#                            (size, tspp_algorithm) for size in grid_sizes])
+#         elapsed_times.extend(results)
+
+#     plot_para = plot_complexity(grid_sizes, elapsed_times,
+#                                 f"{tspp_algorithm}: Time complexity")
+
+#     # Save the results to a CSV file
+#     with open('para.csv', 'w', newline='') as csvfile:
+#         fieldnames = ['grid_size', 'elapsed_time']
+#         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+#         writer.writeheader()
+#         for i in range(len(grid_sizes)):
+#             writer.writerow(
+#                 {'grid_size': grid_sizes[i], 'elapsed_time': elapsed_times[i]})
+
+#     return plot_para
 
 # Plot time complexity
 
@@ -188,6 +240,7 @@ def plot_complexity(grid_sizes, elapsed_times, title):
 
     return plt  # return the plt instance
 
+
 def plot_all_complexity(number_of_points):
     grid_sizes = range(1, number_of_points + 1)
     elapsed_times_nn = []
@@ -205,13 +258,15 @@ def plot_all_complexity(number_of_points):
     plot_C = plt.figure()
 
     # plot the data from the computed experimental grid_sizes and elapsed_times for each algorithm
-    plt.plot(grid_sizes, elapsed_times_nn, marker='o', label='Nearest Neighbor')
+    plt.plot(grid_sizes, elapsed_times_nn,
+             marker='o', label='Nearest Neighbor')
     plt.plot(grid_sizes, elapsed_times_two_opt, marker='s', label='Two-opt')
-    plt.plot(grid_sizes, elapsed_times_christofides, marker='^', label='Christofides')
+    plt.plot(grid_sizes, elapsed_times_christofides,
+             marker='^', label='Christofides')
 
     plt.xlabel('Grid size (NxN)')
     plt.ylabel('Elapsed time (seconds)')
-    plt.title("All Algorithms: Time Complexity")
+    plt.title("All Algorithms: Experimental Time Complexity")
     plt.grid(True)
 
     # Add padding to prevent the y-axis label from being cropped
@@ -226,6 +281,8 @@ def plot_all_complexity(number_of_points):
     return plt
 
 # Plot paths
+
+
 def plot_path(path, title, color='blue', filename=None, coordinates=None):
     plot = plt_instance.figure()
     plt_instance.scatter(coordinates[:, 0], coordinates[:, 1],

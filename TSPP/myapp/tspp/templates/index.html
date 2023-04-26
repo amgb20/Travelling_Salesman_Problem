@@ -49,7 +49,8 @@
             margin-bottom: 5px;
         }
 
-        input, select {
+        input,
+        select {
             width: 100%;
             padding: 5px;
             border: 1px solid #ccc;
@@ -90,11 +91,11 @@
 
     <!-- display menu settings-->
     <nav>
-      <ul>
-        <li><a href="{% url 'home' %}">Home</a></li>
-        <li><a href="{% url 'index' %}">TSPP Workshop</a></li>
-        <li><a href="{% url 'tspp_results' %}">TSPP Results</a></li>
-      </ul>
+        <ul>
+            <li><a href="{% url 'home' %}">Home</a></li>
+            <li><a href="{% url 'index' %}">TSPP Workshop</a></li>
+            <li><a href="{% url 'tspp_results' %}">TSPP Results</a></li>
+        </ul>
     </nav>
 
     <!-- Display features-->
@@ -113,10 +114,16 @@
     <div class="image-container">
         <p><img src="data:image/png;base64,{{ image_base64 }}" alt="Algorithm plot"></p>
         <p><a href="data:image/png;base64,{{ image_base64 }}" download="{{png_filename}}">Download Path Image</a></p>
-        <p><a href="{% url 'download_path_csv' algorithm=algorithm Length=Length Width=Width %}" download="{{ csv_filename }}">Download Global Path Planning Waypoints CSV</a></p>
-        <p><img src="data:image/png;base64,{{ complexity_plot_path }}" alt="Complexity plot"></p>
-        <p><a href="data:image/png;base64,{{ complexity_plot_path }}" download="{{png_filename}}">Download Time Complexity Image</a></p>
-        <p></p><a href="{% url 'download_csv' algorithm=algorithm Length=Length Width=Width %}" download="{{ csv_filename }}">Download Time Complexity CSV</a></p>
+        <p><a href="{% url 'download_path_csv' algorithm=algorithm Length=Length Width=Width %}"
+                download="{{ csv_filename }}">Download Global Path Planning Waypoints CSV</a></p>
+
+        <img src="data:image/png;base64,{{ complexity_plot_path }}" alt="Complexity plot"></p>
+        <p><a href="data:image/png;base64,{{ complexity_plot_path }}" download="{{png_filename}}">Download Time
+                Complexity Image </a></p>
+
+        <p><a href="{% url 'download_csv' algorithm=algorithm Length=Length Width=Width %}"
+                download="{{ csv_filename }}"> Download Time Complexity CSV</a></p>
+
     </div>
 
     {% endif %}

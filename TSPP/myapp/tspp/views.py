@@ -38,6 +38,12 @@ def download_elapsed_time_csv(request,algorithm, Length, Width):
     response['Content-Disposition'] = f'attachment; filename="{algorithm}_{Length}x{Width}_Time_Complexity.csv"'
     return response
 
+def download_cpu_usages_csv(request,algorithm, Length, Width):
+    file_path = 'results.csv'
+    response = FileResponse(open(file_path, 'rb'), content_type='text/csv')
+    response['Content-Disposition'] = f'attachment; filename="{algorithm}_{Length}x{Width}_CPU_Usage.csv"'
+    return response
+
 # # Compile all three complexity plots into a single png file
 # def download_all_complexitty_plots(request):
     
@@ -58,18 +64,27 @@ def index(request):
 
             # Call SimpleGrid functions with the selected algorithm and grid_size
             # Get the result and pass it to the template
-            path, cost, elapsed_time, image_base64 = SimpleGrid.run(Length, Width, tspp_algorithm=algorithm)
+            path, cost, elapsed_time, image_base64, cpu_usages = SimpleGrid.run(Length, Width, tspp_algorithm=algorithm)
             csv_filename = f"{algorithm}_path.csv"
             
-            plt_complexity = SimpleGrid.run_experiments_and_save_plot(Length,tspp_algorithm=algorithm )
+            plt_complexity = SimpleGrid.run_experiments_and_save_plot(Length,tspp_algorithm=algorithm)
 
-             # Convert the plt instance to a base64 image
+             # Convert the plt_complexity instance to a base64 image
             buffer = io.BytesIO()
             plt_complexity.savefig(buffer, format='png')
             buffer.seek(0)
             image_complexity = base64.b64encode(buffer.getvalue()).decode('utf-8')
-            context['complexity_plot_path'] = image_complexity
 
+            # plt_para = SimpleGrid.run_parallel_experiments(Length,tspp_algorithm=algorithm)
+            # # Convert the plt_para instance to a base64 image
+            # buffer1 = io.BytesIO()
+            # plt_para.savefig(buffer1, format='png')
+            # buffer1.seek(0)
+            # image_para = base64.b64encode(buffer1.getvalue()).decode('utf-8')
+
+            # create all the context objects
+            context['complexity_plot_path'] = image_complexity
+            # context['para_plot_path'] = image_para
             context['result'] = (path, cost, elapsed_time)
             context['image_base64'] = image_base64
             context['algorithm'] = algorithm
@@ -83,19 +98,4 @@ def index(request):
     
     context['form'] = form
     return render(request, 'index.html', context)
-
-# def result(request):
-#     if request.method == 'POST':
-#         form = TSPForm(request.POST)
-#         if form.is_valid():
-#             Lentgh = form.cleaned_data['Lentgh']
-#             Width = form.cleaned_data['Width']
-#             algorithm = form.cleaned_data['algorithm']
-
-#             # Call SimpleGrid functions with the selected algorithm and grid_size
-#             # Get the result and pass it to the template
-#             result = SimpleGrid.run(Lentgh, Width, tspp_algorithm=algorithm)
-
-#             return render(request, 'result.html', {'result': result})
-#     return redirect('index')
 
