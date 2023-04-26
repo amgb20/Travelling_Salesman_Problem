@@ -38,6 +38,10 @@ def download_elapsed_time_csv(request,algorithm, Length, Width):
     response['Content-Disposition'] = f'attachment; filename="{algorithm}_{Length}x{Width}_Time_Complexity.csv"'
     return response
 
+# # Compile all three complexity plots into a single png file
+# def download_all_complexitty_plots(request):
+    
+#     SimpleGrid.plot_all_complexity(10)
 
 def index(request):
     result = None
@@ -71,7 +75,8 @@ def index(request):
             context['algorithm'] = algorithm
             context['Length'] = Length
             context['Width'] = Width
-            context['csv_filename'] = f"{algorithm}_{Length}x{Width}.csv" 
+            context['csv_filename'] = f"{algorithm}_{Length}x{Width}.csv"
+            context['png_filename'] = f"{algorithm}_{Length}x{Width}.png"
         
     else:
         form = TSPForm()

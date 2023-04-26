@@ -46,6 +46,7 @@ def end_clock(start_time):
 
     return elapsed_time
 
+
 def find_optimal_start(dist_matrix, tsp_algorithm):
     min_cost = float('inf')
     optimal_start = 0
@@ -187,6 +188,42 @@ def plot_complexity(grid_sizes, elapsed_times, title):
 
     return plt  # return the plt instance
 
+def plot_all_complexity(number_of_points):
+    grid_sizes = range(1, number_of_points + 1)
+    elapsed_times_nn = []
+    elapsed_times_two_opt = []
+    elapsed_times_christofides = []
+
+    for size in grid_sizes:
+        _, _, elapsed_time_nn, _ = run(size, size, "nn")
+        _, _, elapsed_time_two_opt, _ = run(size, size, "two-opt")
+        _, _, elapsed_time_christofides, _ = run(size, size, "christofides")
+        elapsed_times_nn.append(elapsed_time_nn)
+        elapsed_times_two_opt.append(elapsed_time_two_opt)
+        elapsed_times_christofides.append(elapsed_time_christofides)
+
+    plot_C = plt.figure()
+
+    # plot the data from the computed experimental grid_sizes and elapsed_times for each algorithm
+    plt.plot(grid_sizes, elapsed_times_nn, marker='o', label='Nearest Neighbor')
+    plt.plot(grid_sizes, elapsed_times_two_opt, marker='s', label='Two-opt')
+    plt.plot(grid_sizes, elapsed_times_christofides, marker='^', label='Christofides')
+
+    plt.xlabel('Grid size (NxN)')
+    plt.ylabel('Elapsed time (seconds)')
+    plt.title("All Algorithms: Time Complexity")
+    plt.grid(True)
+
+    # Add padding to prevent the y-axis label from being cropped
+    plt.tight_layout()
+
+    # Create a legend
+    plt.legend(loc='best', title='Legend')
+
+    # Save the combined plot to a file
+    plt.savefig('all_complexity.png')
+
+    return plt
 
 # Plot paths
 def plot_path(path, title, color='blue', filename=None, coordinates=None):
@@ -201,7 +238,7 @@ def plot_path(path, title, color='blue', filename=None, coordinates=None):
     plt_instance.title(title)
     plt_instance.xlabel("X")
     plt_instance.ylabel("Y")
-    plt_instance.legend()
+    plt_instance.legend(loc='upper right')
 
     # Number the points according to the order of the path
     for i, point in enumerate(path):
