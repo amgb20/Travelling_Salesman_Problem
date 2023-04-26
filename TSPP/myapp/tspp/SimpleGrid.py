@@ -152,9 +152,27 @@ def plot_complexity(grid_sizes, elapsed_times, title):
     # plot the data from the computed experimental grid_sizes and elapsed_times
     exp_data, = plt.plot(grid_sizes, elapsed_times, marker='o', label='Experimental')
 
-    # Fit a polynomial to the data
-    z = np.polyfit(grid_sizes, elapsed_times, 2)
-    p = np.poly1d(z)
+    # Plot the fitted polynomial
+    if title == "nn: Time complexity":
+        # Fit a quadratic polynomial to the data
+        z = np.polyfit(grid_sizes, elapsed_times, 2)
+        p = np.poly1d(z)
+        # Create equations for the legend
+        equation1 = f'y = {z[0]:.2e}x^2 + {z[1]:.2e}x + {z[2]:.2e}'
+    elif title == "two-opt: Time complexity":
+        # Fit a quadratic polynomial to the data
+        z = np.polyfit(grid_sizes, elapsed_times, 2)
+        p = np.poly1d(z)
+        # Create equations for the legend
+        equation1 = f'y = {z[0]:.2e}x^2 + {z[1]:.2e}x + {z[2]:.2e}'
+    elif title == "christofides: Time complexity":
+        # Fit a cubic polynomial to the data
+        z = np.polyfit(grid_sizes, elapsed_times, 3)
+        p = np.poly1d(z)
+        # Create equations for the legend
+        equation1 = f'y = {z[0]:.2e}x^3 + {z[1]:.2e}x^2\n + {z[2]:.2e}x + {z[3]:.2e}'
+
+    
 
     # Plot the fitted curve for experimental data
     exp_curve, = plt.plot(grid_sizes, p(grid_sizes), 'g--', label="Theoretical")
@@ -166,9 +184,6 @@ def plot_complexity(grid_sizes, elapsed_times, title):
 
     # Add padding to prevent the y-axis label from being cropped
     plt.tight_layout()
-
-    # Create equations for the legend
-    equation1 = f'y = {z[0]:.2e}x^2 + {z[1]:.2e}x + {z[2]:.2e}'
 
     # Create a custom legend
     legend = plt.legend(
