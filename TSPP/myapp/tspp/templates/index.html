@@ -123,6 +123,8 @@
 
         <p><a href="{% url 'download_csv' algorithm=algorithm Length=Length Width=Width %}"
                 download="{{ csv_filename }}"> Download Time Complexity CSV</a></p>
+        <p><a href="{% url 'download_cpu_csv' algorithm=algorithm Length=Length Width=Width %}"
+                download="{{ csv_filename }}"> Download CPU usage CSV</a></p>
 
     </div>
 
