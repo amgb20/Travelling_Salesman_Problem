@@ -11,6 +11,7 @@ import csv
 import base64
 from io import BytesIO
 import matplotlib.pyplot as plt_instance
+from scipy.optimize import curve_fit
 
 # Function that create a timer to detect if the algorithm is taking too long
 
@@ -110,7 +111,7 @@ def run(length, width, tspp_algorithm):
     elapsed_time = end_clock(start)
 
     # compute cost
-    cost = sum(dist_matrix[path[i]][path[i + 1]] for i in range(len(path) - 1))
+    cost = sum(dist_matrix[path[i]][path[i + 1]] for i in range(len(path) - 1)) +1
 
     # Create a plot filename
     plot_filename = f"{tspp_algorithm}_{length}x{width}.png"
@@ -123,17 +124,15 @@ def run(length, width, tspp_algorithm):
     
     return path, cost, elapsed_time, image_base64
 
-def run_experiments_and_save_plot(max_grid_size=10):
-    grid_sizes = range(1, max_grid_size + 1)
+def run_experiments_and_save_plot(number_of_points, tspp_algorithm):
+    grid_sizes = range(1, number_of_points +1)
     elapsed_times = []
 
     for size in grid_sizes:
-        _, _, elapsed_time, _ = run(size, size, tspp_algorithm='nn')
+        _, _, elapsed_time, _ = run(size, size, tspp_algorithm)
         elapsed_times.append(elapsed_time)
 
-    plot_C = plot_complexity(grid_sizes, elapsed_times)
-
-    # image_complexity = plot_to_base64_image(plot_C)
+    plot_C = plot_complexity(grid_sizes, elapsed_times, f"{tspp_algorithm}: Time complexity")
 
     # Save the results to a CSV file
     with open('results.csv', 'w', newline='') as csvfile:
@@ -146,15 +145,49 @@ def run_experiments_and_save_plot(max_grid_size=10):
     return plot_C
 
 # Plot time complexity
-def plot_complexity(grid_sizes, elapsed_times):
+def plot_complexity(grid_sizes, elapsed_times, title):
+
     plot_C = plt.figure()
-    plt.plot(grid_sizes, elapsed_times, marker='o')
+
+    # plot the data from the computed experimental grid_sizes and elapsed_times
+    exp_data, = plt.plot(grid_sizes, elapsed_times, marker='o', label='Experimental')
+
+    # Fit a polynomial to the data
+    z = np.polyfit(grid_sizes, elapsed_times, 2)
+    p = np.poly1d(z)
+
+    # Plot the fitted curve for experimental data
+    exp_curve, = plt.plot(grid_sizes, p(grid_sizes), 'g--', label="Theoretical")
+
     plt.xlabel('Grid size (NxN)')
     plt.ylabel('Elapsed time (seconds)')
-    plt.title('Nearest Neighbor Algorithm Time Complexity')
+    plt.title(title)
     plt.grid(True)
 
-    return plot_C
+    # Add padding to prevent the y-axis label from being cropped
+    plt.tight_layout()
+
+    # Create equations for the legend
+    equation1 = f'y = {z[0]:.2e}x^2 + {z[1]:.2e}x + {z[2]:.2e}'
+
+    # Create a custom legend
+    legend = plt.legend(
+        [exp_data, exp_curve],
+        ['Experimental', f'Theoretical: {equation1}'],
+        loc='best',
+        title='Legend'
+    )
+
+     # Save the results to a CSV file
+    with open('results.csv', 'w', newline='') as csvfile:
+        fieldnames = ['grid_size', 'elapsed_time']
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer.writeheader()
+        for i in range(len(grid_sizes)):
+            writer.writerow({'grid_size': grid_sizes[i], 'elapsed_time': elapsed_times[i]})
+
+    return plt  # return the plt instance
+
 
 # Plot paths
 def plot_path(path, title, color='blue', filename=None, coordinates=None):
@@ -194,16 +227,3 @@ def path_coordinates_to_csv_string(path, coordinates):
     ordered_path_coordinates = coordinates[path, :]
     csv_data = "\n".join([f"{coord[0]},{coord[1]}" for coord in ordered_path_coordinates])
     return csv_data
-
-# filename = "path.csv"
-
-# if filename:
-#     plot_path(nn_path, f"Nearest Neighbor (Optimal start: {nn_optimal_start})", color='blue', filename='nn_path.csv', coordinates=grid_points)
-#     plot_path(two_opt_path, f"2-opt (Optimal start: {two_opt_optimal_start})", color='green', filename='two_opt_path.csv', coordinates=grid_points)
-#     plot_path(christofides_path, f"Christofides (Optimal start: {christofides_optimal_start})", color='orange', filename='christofides_path.csv', coordinates=grid_points)
-# else:
-#     plot_path(nn_path, f"Nearest Neighbor (Optimal start: {nn_optimal_start})", color='blue')
-#     plot_path(two_opt_path, f"2-opt (Optimal start: {two_opt_optimal_start})", color='green')
-#     plot_path(christofides_path, f"Christofides (Optimal start: {christofides_optimal_start})", color='orange')
-
-# plt.show()

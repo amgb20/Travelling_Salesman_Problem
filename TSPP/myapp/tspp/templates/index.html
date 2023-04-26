@@ -76,6 +76,12 @@
             display: block;
             margin: 20px 0;
         }
+
+        .image-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
     </style>
 </head>
 
@@ -92,9 +98,13 @@
     <!-- Display the results as you need, assuming result is a tuple or list -->
     <p>Cost: {{ result.1 }}</p>
     <p>Time to execute the function: {{ result.2 }} seconds</p>
-    <p><img src="data:image/png;base64,{{ image_base64 }}" alt="Algorithm plot"></p>
-    <p><img src="data:image/png;base64,{{ complexity_plot_path }}" alt="Complexity plot"></p>
-    <p><a href="{% url 'download_csv' algorithm=algorithm Length=Length Width=Width %}" download="{{ csv_filename }}">Download CSV</a></p>
+    <div class="image-container">
+        <p><img src="data:image/png;base64,{{ image_base64 }}" alt="Algorithm plot"></p>
+        <p><a href="{% url 'download_path_csv' algorithm=algorithm Length=Length Width=Width %}" download="{{ csv_filename }}">Download Global Path Planning Waypoints CSV</a></p>
+        <p><img src="data:image/png;base64,{{ complexity_plot_path }}" alt="Complexity plot"></p>
+        <p></p><a href="{% url 'download_csv' algorithm=algorithm Length=Length Width=Width %}" download="{{ csv_filename }}">Download Time Complexity CSV</a></p>
+    </div>
+
     {% endif %}
 </body>
 

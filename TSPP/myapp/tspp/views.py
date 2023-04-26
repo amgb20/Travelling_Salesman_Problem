@@ -7,13 +7,14 @@ import io
 import base64
 
 from django.http import HttpResponse
+from django.http import FileResponse
 
 def path_coordinates_to_csv_string(path, coordinates):
     ordered_coordinates = coordinates[path]
     csv_data = "X,Y\n" + "\n".join([f"{coord[0]},{coord[1]}" for coord in ordered_coordinates])
     return csv_data
 
-def download_csv(request, algorithm, Length, Width):
+def download_path_csv(request, algorithm, Length, Width):
     Length = int(Length)
     Width = int(Width)
     path, _, _, _ = SimpleGrid.run(Length, Width, algorithm)
@@ -23,6 +24,12 @@ def download_csv(request, algorithm, Length, Width):
     response = HttpResponse(csv_data, content_type='text/csv')
     response['Content-Disposition'] = f'attachment; filename="{algorithm}_{Length}x{Width}.csv"'
     
+    return response
+
+def download_elapsed_time_csv(request,algorithm, Length, Width):
+    file_path = 'results.csv'
+    response = FileResponse(open(file_path, 'rb'), content_type='text/csv')
+    response['Content-Disposition'] = f'attachment; filename="{algorithm}_{Length}x{Width}_Time_Complexity.csv"'
     return response
 
 
@@ -44,7 +51,7 @@ def index(request):
             path, cost, elapsed_time, image_base64 = SimpleGrid.run(Length, Width, tspp_algorithm=algorithm)
             csv_filename = f"{algorithm}_path.csv"
             
-            plt_complexity = SimpleGrid.run_experiments_and_save_plot()
+            plt_complexity = SimpleGrid.run_experiments_and_save_plot(Length,tspp_algorithm=algorithm )
 
              # Convert the plt instance to a base64 image
             buffer = io.BytesIO()
