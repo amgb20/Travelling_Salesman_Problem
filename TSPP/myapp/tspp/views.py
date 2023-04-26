@@ -1,13 +1,19 @@
-from django.shortcuts import render, redirect
-from .forms import TSPForm
-from . import SimpleGrid
 import numpy as np
 import itertools
 import io
 import base64
 
+from django.shortcuts import render, redirect
+from .forms import TSPForm
+from . import SimpleGrid
 from django.http import HttpResponse
 from django.http import FileResponse
+
+def home(request):
+    return render(request, 'home.html')
+
+def tspp_results(request):
+    return render(request, 'tspp_results.html')
 
 def path_coordinates_to_csv_string(path, coordinates):
     ordered_coordinates = coordinates[path]

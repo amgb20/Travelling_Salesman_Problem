@@ -11,3 +11,30 @@ python3 manage.py runserver
 
 # This what to expect from the user interface
 ![alt text](/TSPP/website.png "User Interface")
+
+```mermaid
+flowchart TB;
+       LiDAR & StereoCamera -->|Point Cloud 2D|J["Sensor Fusion (vis)"];
+
+       IMU & GPS --> B["Sensor Fusion (odom)"];
+
+       USER -->|Boundaries|H[Global Planning];
+
+       J -->|Vecs of Objects rel. to ROMIE?| I;
+
+       B -->|"Odometry (real vel.)"| C[Control];
+
+       H -->|Waypoints| I;
+
+       I[Local Planing] -->|"reference heading (or ref. vel.)"| C;       
+
+       
+       C --->|"velocity output"| X[Motor Controllers];
+       
+       F[Payload] --->|Completion Status| C;
+
+       C -->|Drill Command| F;
+
+       E[Motor Encoders] --> B;
+
+```
