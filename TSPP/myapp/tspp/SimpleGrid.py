@@ -323,15 +323,29 @@ def plot_path(path, title, color='blue', filename=None, coordinates=None, chargi
     plt_instance.scatter(coordinates[:, 0], coordinates[:, 1],
                          c='red', label='Waypoints')
     
+    need_to_charge_label_added = False
+    charging_trajectory_label_added = False
+    
     # place the charging stations
     if charging_stations is not None:
         for out_of_charge_point, charging_station in charging_stations.items():
-            plt_instance.scatter(coordinates[out_of_charge_point, 0], coordinates[out_of_charge_point, 1],
-                                 c='green', marker='*', label='Need to charge...', s=100)
+            if not need_to_charge_label_added:
+                plt_instance.scatter(coordinates[out_of_charge_point, 0], coordinates[out_of_charge_point, 1],
+                                     c='green', marker='*', label='Need to charge...', s=100)
+                need_to_charge_label_added = True
+            else:
+                plt_instance.scatter(coordinates[out_of_charge_point, 0], coordinates[out_of_charge_point, 1],
+                                     c='green', marker='*', s=100)
             # plot charging station routes with thin purple lines
-            plt_instance.plot([coordinates[out_of_charge_point, 0], coordinates[charging_station, 0]],
-                              [coordinates[out_of_charge_point, 1], coordinates[charging_station, 1]],
-                              c='purple', linestyle='dashed', linewidth=0.5, label='Charging Trajectory')
+            if not charging_trajectory_label_added:
+                plt_instance.plot([coordinates[out_of_charge_point, 0], coordinates[charging_station, 0]],
+                                  [coordinates[out_of_charge_point, 1], coordinates[charging_station, 1]],
+                                  c='purple', linestyle='dashed', linewidth=0.5, label='Charging Trajectory')
+                charging_trajectory_label_added = True
+            else:
+                plt_instance.plot([coordinates[out_of_charge_point, 0], coordinates[charging_station, 0]],
+                                  [coordinates[out_of_charge_point, 1], coordinates[charging_station, 1]],
+                                  c='purple', linestyle='dashed', linewidth=0.5)
 
     # # place the charging stations
     # if charging_stations is not None:
