@@ -23,7 +23,7 @@ def path_coordinates_to_csv_string(path, coordinates):
 def download_path_csv(request, algorithm, Length, Width):
     Length = int(Length)
     Width = int(Width)
-    path, _, _, _,_,_,_ = SimpleGrid.run(Length, Width, algorithm) # added last argument
+    path, _, _, _,_,_,_, = SimpleGrid.run(Length, Width, algorithm, max_distance=10) # added last argument
     coordinates = np.array(list(itertools.product(np.linspace(0, Length - 1, Length), np.linspace(0, Width - 1, Width))))
     csv_data = path_coordinates_to_csv_string(path, coordinates)
     
