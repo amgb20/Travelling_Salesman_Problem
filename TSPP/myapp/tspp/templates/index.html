@@ -93,8 +93,25 @@
             border-radius: 5px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
+
         .download-container h3 {
             margin-top: 0;
+        }
+
+        .results-container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .input-container {
+            background-color: antiquewhite;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
         }
     </style>
 </head>
@@ -113,17 +130,23 @@
 
     <!-- Display features-->
     <h2>Travelling Salesman Problem Solver</h2>
-    <form method="post" action="">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Submit</button>
-    </form>
+    <div class="input-container">
+        <form method="post" action="">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+
 
     {% if result %}
-    <h3>Results</h3>
-    <!-- Display the results as you need, assuming result is a tuple or list -->
-    <p>Cost: {{ result.1 }}</p>
-    <p>Time to execute the function: {{ result.2 }} seconds</p>
+    <div class="results-container">
+        <h3>Results</h3>
+        <!-- Display the results as you need, assuming result is a tuple or list -->
+        <p>Cost: {{ result.1 }}</p>
+        <p>Time to execute the function: {{ result.2 }} seconds</p>
+    </div>
+
     <div class="download-container">
         <h3>Download</h3>
         <p><a href="{% url 'download_path_csv' algorithm=algorithm Length=Length Width=Width %}"
