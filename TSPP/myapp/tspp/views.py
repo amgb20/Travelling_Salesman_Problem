@@ -38,6 +38,7 @@ def download_elapsed_time_csv(request,algorithm, Length, Width):
     response['Content-Disposition'] = f'attachment; filename="{algorithm}_{Length}x{Width}_Time_Complexity.csv"'
     return response
 
+# --- RESTRUCTURE THIS FILE TO HAVE A BETTER FILE STRUCT --- #
 def download_cpu_usages_csv(request,algorithm, Length, Width):
     file_path = 'results.csv'
     response = FileResponse(open(file_path, 'rb'), content_type='text/csv')
@@ -64,7 +65,7 @@ def index(request):
 
             # Call SimpleGrid functions with the selected algorithm and grid_size
             # Get the result and pass it to the template
-            path, cost, elapsed_time, image_base64, cpu_usages = SimpleGrid.run(Length, Width, tspp_algorithm=algorithm)
+            path, cost, elapsed_time, image_base64, cpu_usages, memory_usage = SimpleGrid.run(Length, Width, tspp_algorithm=algorithm)
             csv_filename = f"{algorithm}_path.csv"
             
             plt_complexity = SimpleGrid.run_experiments_and_save_plot(Length,tspp_algorithm=algorithm)

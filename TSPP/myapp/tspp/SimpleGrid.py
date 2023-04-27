@@ -20,6 +20,7 @@ import numpy as np
 import itertools
 import matplotlib.pyplot as plt
 import matplotlib.pyplot as plt_instance
+import matplotlib.pyplot as plt_cpu
 import time
 import os
 import csv
@@ -47,17 +48,28 @@ def end_clock(start_time):
     finish_time = time.perf_counter()
     return finish_time
 
-#
+# Function that returns the cpu usage
 
 
 def cpu_start():
-    start_time = psutil.cpu_percent(interval=None)
+    # start_time = psutil.cpu_percent(interval=None)
+    start_time = time.process_time()
+    time.sleep(0.1)
     return start_time
 
 
 def cpu_end():
-    finish_time = psutil.cpu_percent(interval=None)
+    finish_time = time.process_time()
+    # finish_time = psutil.cpu_percent(interval=None)
     return finish_time
+
+# get ram usage
+
+
+def get_memory_usage():
+    process = psutil.Process(os.getpid())
+    mem_info = process.memory_info()
+    return mem_info.rss
 
 
 def find_optimal_start(dist_matrix, tsp_algorithm):
@@ -96,13 +108,27 @@ def run(length, width, tspp_algorithm):
     # find optimal starting position
     optimal_start = find_optimal_start(dist_matrix, algorithms[tspp_algorithm])
 
-    # solve, compare and compute elapsed time and CPU time
+    # solve, compare and compute elapsed time and CPU time and RAM usage
+    
+     # Start CPU usage monitoring
+    start_cpu_usage = psutil.cpu_percent(interval=None, percpu=True)
+
+    # measure memory usage before running the algorithm
+    start_memory = get_memory_usage()
+
     start = start_clock()
     start_CPU = cpu_start()
     path = algorithms[tspp_algorithm](dist_matrix, optimal_start)
     end_CPU = cpu_end()
     elapsed_time = end_clock(start) - start
-    cpu_percentages = end_CPU - start_CPU
+    
+    cpu_percentages = ((end_CPU - start_CPU)/elapsed_time)*100
+
+    # Measure memory usage after running the algorithm
+    end_memory = get_memory_usage()
+
+    # Calculate the memory usage (difference)
+    memory_usage = end_memory - start_memory
 
     # compute cost
     cost = sum(dist_matrix[path[i]][path[i + 1]]
@@ -117,7 +143,8 @@ def run(length, width, tspp_algorithm):
 
     image_base64 = plot_to_base64_image(plot)
 
-    return path, cost, elapsed_time, image_base64, cpu_percentages
+
+    return path, cost, elapsed_time, image_base64, cpu_percentages, memory_usage
 
 
 def run_experiments_and_save_plot(number_of_points, tspp_algorithm):
@@ -126,22 +153,22 @@ def run_experiments_and_save_plot(number_of_points, tspp_algorithm):
     cpu_usages = []
 
     for size in grid_sizes:
-        _, _, elapsed_time, _, cpu_usage = run(
+        _, _, elapsed_time, _, cpu_usage, memory_usage = run(
             size, size, tspp_algorithm)
         elapsed_times.append(elapsed_time)
-        cpu_usages.append(cpu_usage)  #  store the CPU usage
+        cpu_usages.append(cpu_usage)  # store the CPU usage
 
     plot_C = plot_complexity(grid_sizes, elapsed_times,
                              f"{tspp_algorithm}: Time complexity")
 
     # Save the results to a CSV file
     with open('results.csv', 'w', newline='') as csvfile:
-        fieldnames = ['grid_size', 'elapsed_time', 'cpu_usage']
+        fieldnames = ['grid_size', 'elapsed_time', 'cpu_usage', 'memory_usage']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
         for i in range(len(grid_sizes)):
             writer.writerow(
-                {'grid_size': grid_sizes[i], 'elapsed_time': elapsed_times[i],'cpu_usage': cpu_usages[i]})
+                {'grid_size': grid_sizes[i], 'elapsed_time': elapsed_times[i], 'cpu_usage': cpu_usages[i], 'memory_usage': memory_usage})
 
     return plot_C
 
@@ -177,6 +204,7 @@ def run_experiments_and_save_plot(number_of_points, tspp_algorithm):
 #                 {'grid_size': grid_sizes[i], 'elapsed_time': elapsed_times[i]})
 
 #     return plot_para
+
 
 # Plot time complexity
 
