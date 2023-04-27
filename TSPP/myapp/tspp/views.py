@@ -23,7 +23,7 @@ def path_coordinates_to_csv_string(path, coordinates):
 def download_path_csv(request, algorithm, Length, Width):
     Length = int(Length)
     Width = int(Width)
-    path, _, _, _,_,_ = SimpleGrid.run(Length, Width, algorithm)
+    path, _, _, _,_,_,_ = SimpleGrid.run(Length, Width, algorithm) # added last argument
     coordinates = np.array(list(itertools.product(np.linspace(0, Length - 1, Length), np.linspace(0, Width - 1, Width))))
     csv_data = path_coordinates_to_csv_string(path, coordinates)
     
@@ -65,7 +65,7 @@ def index(request):
 
             # Call SimpleGrid functions with the selected algorithm and grid_size
             # Get the result and pass it to the template
-            path, cost, elapsed_time, image_base64, cpu_usages, memory_usage = SimpleGrid.run(Length, Width, tspp_algorithm=algorithm)
+            path, cost, elapsed_time, image_base64, cpu_usages, memory_usage, chargin_station = SimpleGrid.run(Length, Width, tspp_algorithm=algorithm, max_distance=10)
             csv_filename = f"{algorithm}_path.csv"
             
             plt_complexity = SimpleGrid.run_experiments_and_save_plot(Length,tspp_algorithm=algorithm)

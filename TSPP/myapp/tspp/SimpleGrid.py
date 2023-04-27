@@ -34,6 +34,7 @@ from scipy.spatial.distance import pdist, squareform
 from tsp_solver.greedy import solve_tsp
 from concurrent.futures import ThreadPoolExecutor, TimeoutError
 from . import tssp_algorithms
+from . import chargingStation
 from multiprocessing import Pool, cpu_count
 
 # Function that create a timer to detect if the algorithm is taking too long
@@ -87,8 +88,12 @@ def find_optimal_start(dist_matrix, tsp_algorithm):
 
     return optimal_start
 
+# Function that plots the path by calling the tspp algorithm
 
-def run(length, width, tspp_algorithm):
+# --- max_distance is the maximum distance the robot can travel before needing to recharge -- #
+
+
+def run(length, width, tspp_algorithm, max_distance):
 
     # generate a grid of points
     x = np.linspace(0, length - 1, length)
@@ -109,8 +114,8 @@ def run(length, width, tspp_algorithm):
     optimal_start = find_optimal_start(dist_matrix, algorithms[tspp_algorithm])
 
     # solve, compare and compute elapsed time and CPU time and RAM usage
-    
-     # Start CPU usage monitoring
+
+    # Start CPU usage monitoring
     start_cpu_usage = psutil.cpu_percent(interval=None, percpu=True)
 
     # measure memory usage before running the algorithm
@@ -121,7 +126,7 @@ def run(length, width, tspp_algorithm):
     path = algorithms[tspp_algorithm](dist_matrix, optimal_start)
     end_CPU = cpu_end()
     elapsed_time = end_clock(start) - start
-    
+
     cpu_percentages = ((end_CPU - start_CPU)/elapsed_time)*100
 
     # Measure memory usage after running the algorithm
@@ -129,6 +134,9 @@ def run(length, width, tspp_algorithm):
 
     # Calculate the memory usage (difference)
     memory_usage = end_memory - start_memory
+
+    charging_stations, charging_station_routes = chargingStation.find_optimal_charging_station(
+        path, grid_points, max_distance)
 
     # compute cost
     cost = sum(dist_matrix[path[i]][path[i + 1]]
@@ -139,12 +147,11 @@ def run(length, width, tspp_algorithm):
 
     # Plot and save the image
     plot = plot_path(path, f"{tspp_algorithm} (Optimal start: {optimal_start})", color='blue',
-                     filename=f"{tspp_algorithm}_path.csv", coordinates=grid_points)
+                     filename=f"{tspp_algorithm}_path.csv", coordinates=grid_points, charging_stations=charging_stations, charging_station_routes=charging_station_routes)
 
     image_base64 = plot_to_base64_image(plot)
 
-
-    return path, cost, elapsed_time, image_base64, cpu_percentages, memory_usage
+    return path, cost, elapsed_time, image_base64, cpu_percentages, memory_usage, charging_stations
 
 
 def run_experiments_and_save_plot(number_of_points, tspp_algorithm):
@@ -153,8 +160,8 @@ def run_experiments_and_save_plot(number_of_points, tspp_algorithm):
     cpu_usages = []
 
     for size in grid_sizes:
-        _, _, elapsed_time, _, cpu_usage, memory_usage = run(
-            size, size, tspp_algorithm)
+        _, _, elapsed_time, _, cpu_usage, memory_usage, _ = run(
+            size, size, tspp_algorithm, max_distance=1)
         elapsed_times.append(elapsed_time)
         cpu_usages.append(cpu_usage)  # store the CPU usage
 
@@ -311,15 +318,37 @@ def plot_all_complexity(number_of_points):
 # Plot paths
 
 
-def plot_path(path, title, color='blue', filename=None, coordinates=None):
+def plot_path(path, title, color='blue', filename=None, coordinates=None, charging_stations=None, charging_station_routes=None):
     plot = plt_instance.figure()
     plt_instance.scatter(coordinates[:, 0], coordinates[:, 1],
                          c='red', label='Waypoints')
+    
+    # place the charging stations
+    if charging_stations is not None:
+        for out_of_charge_point, charging_station in charging_stations.items():
+            plt_instance.scatter(coordinates[out_of_charge_point, 0], coordinates[out_of_charge_point, 1],
+                                 c='green', marker='*', label='Need to charge...', s=100)
+            # plot charging station routes with thin purple lines
+            plt_instance.plot([coordinates[out_of_charge_point, 0], coordinates[charging_station, 0]],
+                              [coordinates[out_of_charge_point, 1], coordinates[charging_station, 1]],
+                              c='purple', linestyle='dashed', linewidth=0.5, label='Charging Trajectory')
+
+    # # place the charging stations
+    # if charging_stations is not None:
+    #     plt_instance.scatter(coordinates[charging_stations, 0], coordinates[charging_stations, 1],
+    #                          c='green', marker='*', label='Need to charge...', s=100)
 
     # place the robot at the optimal start
     plt_instance.scatter(coordinates[0, 0], coordinates[0, 1],
                          c='yellow', marker='s', label='Robot')
     plt_instance.plot(coordinates[path, 0], coordinates[path, 1], c=color)
+
+    # # plot charging station routes with thin purple lines
+    # if charging_station_routes is not None:
+    #     for route in charging_station_routes:
+    #         plt_instance.plot(coordinates[route, 0], coordinates[route, 1],
+    #                           c='purple', linestyle='dashed', linewidth=0.5, label='Charging Trajectory')
+
     plt_instance.title(title)
     plt_instance.xlabel("X")
     plt_instance.ylabel("Y")
@@ -329,6 +358,9 @@ def plot_path(path, title, color='blue', filename=None, coordinates=None):
     for i, point in enumerate(path):
         plt_instance.annotate(
             str(i), (coordinates[point, 0], coordinates[point, 1]), fontsize=8, ha='right')
+
+    # # Add custom legend to avoid duplicate labels
+    # handles, labels = plt_instance
 
     if filename:
         # save the 2D coordinates of the path to a csv file
