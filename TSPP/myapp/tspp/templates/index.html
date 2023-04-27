@@ -83,6 +83,19 @@
             justify-content: center;
             flex-wrap: wrap;
         }
+
+        .download-container {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .download-container h3 {
+            margin-top: 0;
+        }
     </style>
 </head>
 
@@ -111,20 +124,18 @@
     <!-- Display the results as you need, assuming result is a tuple or list -->
     <p>Cost: {{ result.1 }}</p>
     <p>Time to execute the function: {{ result.2 }} seconds</p>
-    <div class="image-container">
-        <p><img src="data:image/png;base64,{{ image_base64 }}" alt="Algorithm plot"></p>
-        <p><a href="data:image/png;base64,{{ image_base64 }}" download="{{png_filename}}">Download Path Image</a></p>
+    <div class="download-container">
+        <h3>Download</h3>
         <p><a href="{% url 'download_path_csv' algorithm=algorithm Length=Length Width=Width %}"
                 download="{{ csv_filename }}">Download Global Path Planning Waypoints CSV</a></p>
-
-        <img src="data:image/png;base64,{{ complexity_plot_path }}" alt="Complexity plot"></p>
-        <p><a href="data:image/png;base64,{{ complexity_plot_path }}" download="{{png_filename}}">Download Time
-                Complexity Image </a></p>
-
         <p><a href="{% url 'download_csv' algorithm=algorithm Length=Length Width=Width %}"
                 download="{{ csv_filename }}"> Download Time Complexity CSV</a></p>
         <p><a href="{% url 'download_cpu_csv' algorithm=algorithm Length=Length Width=Width %}"
                 download="{{ csv_filename }}"> Download CPU usage CSV</a></p>
+    </div>
+    <div class="image-container">
+        <p><img src="data:image/png;base64,{{ image_base64 }}" alt="Algorithm plot"></p>
+        <p><img src="data:image/png;base64,{{ complexity_plot_path }}" alt="Complexity plot"></p>
     </div>
 
     {% endif %}
