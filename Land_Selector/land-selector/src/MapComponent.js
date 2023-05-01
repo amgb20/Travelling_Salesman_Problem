@@ -27,7 +27,7 @@ const MapComponent = () => {
     }
     rectangleRef.current = rectangle;
   };
-  
+
 
   const handleDrawingModeClick = () => {
     setIsDrawingMode((prevState) => !prevState);
@@ -46,16 +46,16 @@ const MapComponent = () => {
     const sw = bounds.getSouthWest();
     const nw = new window.google.maps.LatLng(ne.lat(), sw.lng());
     const se = new window.google.maps.LatLng(sw.lat(), ne.lng());
-  
+
     const coordinates = `The GPS coordinates of the rectangle corners are:
       NE: ${ne.lat()}, ${ne.lng()}
       NW: ${nw.lat()}, ${nw.lng()}
       SW: ${sw.lat()}, ${sw.lng()}
       SE: ${se.lat()}, ${se.lng()}`;
-  
+
     document.getElementById('coordinatesDisplay').value = coordinates;
   };
-  
+
 
   const onMapLoad = useCallback((map) => {
     mapRef.current = map;
@@ -78,8 +78,33 @@ const MapComponent = () => {
     libraries: ['drawing'],
   });
 
+  // return (
+  //   <div className="map-container">
+  //     {isLoaded ? (
+  //       <>
+  //         <div className="controls-container">
+  //           <button className="button" onClick={handleDrawingModeClick}>
+  //             {isDrawingMode ? 'Stop Drawing' : 'Start Drawing'}
+  //           </button>
+  //           <button className="button" onClick={handleButtonClick}>
+  //             Submit
+  //           </button>
+  //           <textarea id="coordinatesDisplay" readOnly className="coordinates-display" />
+  //         </div>
+  //         <GoogleMap
+  //           mapContainerStyle={mapStyles}
+  //           zoom={13}
+  //           center={defaultCenter}
+  //           onLoad={onMapLoad}
+  //         />
+  //       </>
+  //     ) : (
+  //       <div>Loading...</div>
+  //     )}
+  //   </div>
+  // );
   return (
-    <div className="map-container">
+    <div>
       {isLoaded ? (
         <>
           <div className="controls-container">
@@ -89,20 +114,25 @@ const MapComponent = () => {
             <button className="button" onClick={handleButtonClick}>
               Submit
             </button>
-            <textarea id="coordinatesDisplay" readOnly className="coordinates-display" />
+            <div className='print-box'>
+              <textarea id="coordinatesDisplay" readOnly className="coordinates-display" />
+            </div>
           </div>
-          <GoogleMap
-            mapContainerStyle={mapStyles}
-            zoom={13}
-            center={defaultCenter}
-            onLoad={onMapLoad}
-          />
+          <div className="map-container">
+            <GoogleMap
+              mapContainerStyle={mapStyles}
+              zoom={13}
+              center={defaultCenter}
+              onLoad={onMapLoad}
+            />
+          </div>
         </>
       ) : (
         <div>Loading...</div>
       )}
     </div>
   );
+
 };
 
 export default MapComponent;
