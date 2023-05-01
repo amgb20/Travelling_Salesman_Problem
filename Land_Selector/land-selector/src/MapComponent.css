@@ -1,0 +1,23 @@
+.map-container {
+  position: relative;
+}
+
+.controls-container {
+  position: absolute;
+  top: 10px;
+  right: 1000px; /* Adjusted to right align the controls */
+  display: flex;
+  flex-direction: column;
+}
+
+
+.button {
+  margin-bottom: 5px;
+}
+
+.coordinates-display {
+  resize: none;
+  width: 250px;
+  height: 100px;
+}
+
