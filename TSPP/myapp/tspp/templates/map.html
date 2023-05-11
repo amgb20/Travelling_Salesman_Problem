@@ -111,6 +111,8 @@
                     <option value="51.5074,-0.1278">London</option>
                     <option value="40.7128,-74.0060">New York</option>
                 </select>
+                <label for="grid-size">Grid Size:</label>
+                <input type="number" id="grid-size" name="grid-size" min="1">
                 <br>
                 <input type="button" value="Go" onclick="teleport()">
                 <input type="button" id="start" value="Start Demarcate" onclick="startDrawing()">
@@ -118,6 +120,7 @@
                 <input type="button" id="reset" value="Reset" onclick="resetDrawing()" disabled>
                 <input type="button" id="resize" value="Resize" onclick="resizeMap()" disabled>
                 <input type="button" id="choose-points" value="Choose Points" onclick="choosePoints()" disabled>
+                <input type="button" id="create-grid" value="Create Grid" onclick="createGrid()" disabled>
             </form>
             <h2>Rectangle coordinates:</h2>
             <div id="rectangle-coordinates"></div>
@@ -139,6 +142,7 @@
     <script>
         let map, marker, rectangle, drawingManager, infoWindow;
         let points = [];
+        let gridLines = [];
 
         // Initialize the map
         function initMap() {
@@ -150,9 +154,6 @@
                 scaleControl: true // Adds a scale control
             });
             marker = new google.maps.Marker({ position: yourPlace, map: map });
-
-            // document.getElementById('start').addEventListener('click', startDrawing);
-            // document.getElementById('stop').addEventListener('click', stopDrawing);
         }
 
         // Teleport the map to a given latitude and longitude
@@ -175,6 +176,73 @@
                 marker.setPosition(position);
             }
         }
+
+        function createGrid() {
+            const gridSize = document.getElementById('grid-size').value;
+            const bounds = rectangle.getBounds();
+
+            // Disable the "Create Grid" button
+            document.getElementById('create-grid').disabled = true;
+
+            // Calculate lat and lng increments based on the size of the grid
+            const latIncrement = (bounds.getNorthEast().lat() - bounds.getSouthWest().lat()) / gridSize;
+            const lngIncrement = (bounds.getNorthEast().lng() - bounds.getSouthWest().lng()) / gridSize;
+
+            let counter = 1;
+
+            // Place markers on each intersection
+            for (let i = 0; i <= gridSize; i++) {
+                for (let j = 0; j <= gridSize; j++) {
+                    const lat = bounds.getSouthWest().lat() + latIncrement * i;
+                    const lng = bounds.getSouthWest().lng() + lngIncrement * j;
+                    const point = new google.maps.Marker({
+                        position: { lat: lat, lng: lng },
+                        map: map,
+                        label: `${counter}`
+                    });
+
+                    points.push(point);
+
+                    // Update the points display
+                    document.getElementById('points').innerHTML += 'Point ' + (points.length) + ': ' + point.position.toString() + '<br>';
+
+                    counter++;
+                }
+            }
+
+            // Draw grid lines
+            for (let i = 0; i <= gridSize; i++) {
+                const lat = bounds.getSouthWest().lat() + latIncrement * i;
+                const lng = bounds.getSouthWest().lng() + lngIncrement * i;
+
+                // horizontal grid line
+                const horizontalLine = new google.maps.Polyline({
+                    path: [
+                        { lat: lat, lng: bounds.getSouthWest().lng() },
+                        { lat: lat, lng: bounds.getNorthEast().lng() }
+                    ],
+                    strokeColor: '#FF0000',
+                    strokeOpacity: 1.0,
+                    strokeWeight: 2,
+                    map: map
+                });
+
+                // vertical grid line
+                const verticalLine = new google.maps.Polyline({
+                    path: [
+                        { lat: bounds.getSouthWest().lat(), lng: lng },
+                        { lat: bounds.getNorthEast().lat(), lng: lng }
+                    ],
+                    strokeColor: '#FF0000',
+                    strokeOpacity: 1.0,
+                    strokeWeight: 2,
+                    map: map
+                });
+
+                gridLines.push(horizontalLine, verticalLine);
+            }
+        }
+
 
         // Place the points in the rectangle on the map
         function placePoint(event) {
@@ -266,6 +334,7 @@
             document.getElementById('reset').disabled = false; // Keep the Reset button enabled
             document.getElementById('resize').disabled = false; // Enable the Resize button
             document.getElementById('choose-points').disabled = false; // Enable the Choose Points button
+            document.getElementById('create-grid').disabled = false; // Enable the Create Grid button
         }
 
 
@@ -298,6 +367,16 @@
 
             // Stop choosing points
             stopChoosingPoints();
+
+            // Remove the grid lines from the map
+            for (let i = 0; i < gridLines.length; i++) {
+                gridLines[i].setMap(null);
+            }
+
+            // Clear the grid lines array
+            gridLines = [];
+            // Enable the "Create Grid" button
+            document.getElementById('create-grid').disabled = false;
 
         }
 
