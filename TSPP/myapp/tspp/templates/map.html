@@ -3,75 +3,95 @@
 
 <head>
     <style>
+        #container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
         #map-container {
-            position: absolute;
-            top: 0;
-            right: 0;
             width: 50%;
-            height: 400px;
+            height: 100%;
             border: 1px solid #ccc;
         }
 
         /* Set the size of the div element that contains the map */
         #map {
-            height: 400px;
-            /* The height is 400 pixels */
+            height: 100%;
+            /* The height is the full height of the container */
             width: 100%;
-            /* The width is the width of the web page */
-        }
-
-        .right {
-            position: absolute;
-            right: 200px;
-            bottom: 750px;
-            width: 70%;
+            /* The width is the full width of the container */
         }
 
         .left {
-            position: absolute;
-            left: 100px;
             width: 50%;
+            padding: 20px;
+        }
+
+        .left h2 {
+            margin-top: 0;
         }
     </style>
 </head>
 
 <body>
-    <div class="left">
-        <h2>Teleport To:</h2>
-        <form id="teleport-form">
-            <label for="latitude">Latitude:</label><br>
-            <input type="text" id="latitude" name="latitude"><br>
-            <label for="longitude">Longitude:</label><br>
-            <input type="text" id="longitude" name="longitude"><br>
-            <label for="location-select">Or select a location:</label><br>
-            <select id="location-select">
-                <option value="">--Select a Location--</option>
-                <option value="-33.8688,151.2093">Sydney</option>
-                <option value="51.5074,-0.1278">London</option>
-                <option value="40.7128,-74.0060">New York</option>
-            </select><br>
-            <input type="button" value="Go" onclick="teleport()">
-        </form>
-    </div>
-    
-    <div class="right">
-        <div id="map-container">
-            <div id="map">
+    <div id="container">
+        <div class="left">
+            <h2>Teleport To:</h2>
+            <form id="teleport-form">
+                <label for="latitude">Latitude:</label><br>
+                <input type="text" id="latitude" name="latitude"><br>
+                <label for="longitude">Longitude:</label><br>
+                <input type="text" id="longitude" name="longitude"><br>
+                <label for="location-select">Or select a location:</label><br>
+                <select id="location-select">
+                    <option value="">--Select a Location--</option>
+                    <option value="-33.8688,151.2093">Sydney</option>
+                    <option value="51.5074,-0.1278">London</option>
+                    <option value="40.7128,-74.0060">New York</option>
+                </select><br>
+                <input type="button" value="Go" onclick="teleport()">
+                <input type="button" id="start" value="Start Demarcate" onclick="startDrawing()">
+                <input type="button" id="stop" value="Stop Demarcate" onclick="stopDrawing()" disabled>
+                <input type="button" id="reset" value="Reset" onclick="resetDrawing()" disabled>
+                <input type="button" id="resize" value="Resize" onclick="resizeMap()" disabled>
+                <input type="button" id="choose-points" value="Choose Points" onclick="choosePoints()" disabled>
+            </form>
+            <h2>Rectangle coordinates:</h2>
+            <div id="rectangle-coordinates"></div>
+            <div>
+                <h2>Rectangle Perimeter:</h2>
+                <div id="rectangle-perimeter"></div>
+            </div>
+            <div id="points-container">
+                <h2>Points:</h2>
+                <div id="points"></div>
             </div>
         </div>
 
-        <script>
-            let map, marker;
-        
+        <div id="map-container">
+            <div id="map"></div>
+        </div>
+    </div>
+
+    <script>
+        let map, marker, rectangle, drawingManager, infoWindow;
+        let points = [];
+
         // Initialize the map
         function initMap() {
-            const yourPlace = { lat: -25.344, lng: 131.036 };
+            const yourPlace = { lat: 44.5452, lng: -78.5389 };
             map = new google.maps.Map(document.getElementById('map'), {
                 zoom: 4,
                 center: yourPlace,
+                mapTypeId: 'satellite', // Can be any valid type
                 scaleControl: true // Adds a scale control
             });
             marker = new google.maps.Marker({ position: yourPlace, map: map });
+
+            // document.getElementById('start').addEventListener('click', startDrawing);
+            // document.getElementById('stop').addEventListener('click', stopDrawing);
         }
 
         // Teleport the map to a given latitude and longitude
@@ -94,10 +114,182 @@
                 marker.setPosition(position);
             }
         }
+
+        // Place the points in the rectangle on the map
+        function placePoint(event) {
+            const bounds = rectangle.getBounds();
+
+            if (bounds.contains(event.latLng)) {
+                const point = new google.maps.Marker({
+                    position: event.latLng,
+                    map: map,
+                    label: `${points.length + 1}`
+                });
+
+                points.push(point);
+
+                // Update the points display
+                document.getElementById('points').innerHTML += 'Point ' + (points.length) + ': ' + event.latLng.toString() + '<br>';
+            } else {
+                alert('Point is out of bounds');
+            }
+        }
+
+        function stopChoosingPoints() {
+            google.maps.event.clearListeners(map, 'click');
+            document.getElementById('choose-points').disabled = false;
+        }
+
+
+        function choosePoints() {
+            // Add a click listener to the map
+            map.addListener('click', placePoint);
+
+            // Disable the Choose Points button
+            document.getElementById('choose-points').disabled = true;
+        }
+
+
+        function startDrawing() {
+            map.setOptions({ disableDefaultUI: true, draggable: true });
+
+            // Calculate bounds around the current center of the map
+            let center = map.getCenter();
+            const bounds = {
+                north: center.lat() + 0.01,
+                south: center.lat() - 0.01,
+                east: center.lng() + 0.01,
+                west: center.lng() - 0.01
+            };
+
+            // Create a rectangle and add it to the map
+            rectangle = new google.maps.Rectangle({
+                bounds: bounds,
+                editable: true,
+                draggable: true
+            });
+            rectangle.setMap(map);
+
+            // Add an event listener to update the coordinate display as the rectangle is moved or resized
+            rectangle.addListener('bounds_changed', showNewRect);
+
+            // Call the calculatePerimeter function to update the perimeter display
+            rectangle.addListener('bounds_changed', calculatePerimeter);
+
+            // Add a click listener to the map
+            map.addListener('click', placePoint);
+
+
+            document.getElementById('start').disabled = true;
+            document.getElementById('stop').disabled = false;
+            document.getElementById('reset').disabled = false; // Enable the Reset button
+            document.getElementById('resize').disabled = true; // Disable the Resize button
+            document.getElementById('choose-points').disabled = true; // Disable the Choose Points button
+
+
+
+        }
+
+        function stopDrawing() {
+            rectangle.setOptions({ disableDefaultUI: false, draggable: false, editable: false });
+            map.setOptions({ disableDefaultUI: false, draggable: false, draggableCursor: '' });
+
+            // Do not clear the map click event listener here. It's now handled by stopChoosingPoints()
+            google.maps.event.clearListeners(rectangle, 'bounds_changed');
+
+            // Add a click listener to the map
+            rectangle.addListener('click', placePoint);
+
+            document.getElementById('start').disabled = false;
+            document.getElementById('stop').disabled = true;
+            document.getElementById('reset').disabled = false; // Keep the Reset button enabled
+            document.getElementById('resize').disabled = false; // Enable the Resize button
+            document.getElementById('choose-points').disabled = false; // Enable the Choose Points button
+        }
+
+
+        function resetDrawing() {
+            // Remove the rectangle from the map
+            if (rectangle) {
+                rectangle.setMap(null);
+                rectangle = null;
+            }
+
+            // Re-enable the Start button and disable the Stop and Reset buttons
+            document.getElementById('start').disabled = false;
+            document.getElementById('stop').disabled = true;
+            document.getElementById('reset').disabled = true;
+
+            // Clear the coordinate display
+            document.getElementById('rectangle-coordinates').innerText = '';
+            document.getElementById('resize').disabled = true; // Disable the Resize button
+
+            document.getElementById('choose-points').disabled = true; // Disable the Choose Points button
+
+            // Remove the points from the map
+            for (let i = 0; i < points.length; i++) {
+                points[i].setMap(null);
+            }
+
+            // Clear the points array and the points display
+            points = [];
+            document.getElementById('points').innerHTML = '';
+
+            // Stop choosing points
+            stopChoosingPoints();
+
+        }
+
+
+        /** Show the new coordinates for the rectangle in an info window. */
+        function showNewRect() {
+
+            // Calculate the NE and SW corners
+            const ne = rectangle.getBounds().getNorthEast();
+            const sw = rectangle.getBounds().getSouthWest();
+
+            // Calculate the NW and SE corners
+            const nw = new google.maps.LatLng(ne.lat(), sw.lng());
+            const se = new google.maps.LatLng(sw.lat(), ne.lng());
+
+            // Update the coordinate display
+            document.getElementById('rectangle-coordinates').innerHTML =
+                'NE: ' + ne.toString() + '<br>' +
+                'NW: ' + nw.toString() + '<br>' +
+                'SW: ' + sw.toString() + '<br>' +
+                'SE: ' + se.toString();
+        }
+
+        // Calculate the perimeter of the rectangle
+        function calculatePerimeter() {
+            const ne = rectangle.getBounds().getNorthEast();
+            const nw = new google.maps.LatLng(ne.lat(), rectangle.getBounds().getSouthWest().lng());
+            const sw = rectangle.getBounds().getSouthWest();
+            const se = new google.maps.LatLng(sw.lat(), rectangle.getBounds().getNorthEast().lng());
+
+            const latPerimeter = google.maps.geometry.spherical.computeDistanceBetween(sw, nw); // Perimeter along latitude in meters
+            const lngPerimeter = google.maps.geometry.spherical.computeDistanceBetween(nw, ne); // Perimeter along longitude in meters
+
+            const perimeter = 2 * (latPerimeter + lngPerimeter); // Perimeter in meters
+
+            document.getElementById('rectangle-perimeter').innerHTML = '<p>Perimeter is: <strong>' + perimeter.toLocaleString() + ' meters&sup2;</strong></p>';
+        }
+
+        // Resize the rectangle to fit the viewport
+        function resizeMap() {
+            // Get the bounds of the rectangle
+            const bounds = rectangle.getBounds();
+
+            // Adjust the map's viewport to fit the rectangle
+            map.fitBounds(bounds);
+        }
+
+
+        window.initMap = initMap;
+
     </script>
-        <script async defer
-            src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}&callback=initMap">
-            </script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}&callback=initMap">
+    </script>
     </div>
 </body>
 
