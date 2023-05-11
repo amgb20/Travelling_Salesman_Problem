@@ -107,8 +107,7 @@ def run(length, width, tspp_algorithm, max_distance):
     algorithms = {
         'nn': tssp_algorithms.nearest_neighbour,
         'two-opt': tssp_algorithms.two_opt,
-        'christofides': tssp_algorithms.christofides,
-        'back_and_forth': tssp_algorithms.back_and_forth
+        'christofides': tssp_algorithms.christofides
     }
 
     # find optimal starting position

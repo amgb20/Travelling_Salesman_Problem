@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        #map-container {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 50%;
+            height: 400px;
+            border: 1px solid #ccc;
+        }
+
+        /* Set the size of the div element that contains the map */
+        #map {
+            height: 400px;
+            /* The height is 400 pixels */
+            width: 100%;
+            /* The width is the width of the web page */
+        }
+
+        .right {
+            position: absolute;
+            right: 200px;
+            bottom: 750px;
+            width: 70%;
+        }
+
+        .left {
+            position: absolute;
+            left: 100px;
+            width: 50%;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="left">
+        <h2>Teleport To:</h2>
+        <form id="teleport-form">
+            <label for="latitude">Latitude:</label><br>
+            <input type="text" id="latitude" name="latitude"><br>
+            <label for="longitude">Longitude:</label><br>
+            <input type="text" id="longitude" name="longitude"><br>
+            <label for="location-select">Or select a location:</label><br>
+            <select id="location-select">
+                <option value="">--Select a Location--</option>
+                <option value="-33.8688,151.2093">Sydney</option>
+                <option value="51.5074,-0.1278">London</option>
+                <option value="40.7128,-74.0060">New York</option>
+            </select><br>
+            <input type="button" value="Go" onclick="teleport()">
+        </form>
+    </div>
+    
+    <div class="right">
+        <div id="map-container">
+            <div id="map">
+            </div>
+        </div>
+
+        <script>
+            let map, marker;
+        
+        // Initialize the map
+        function initMap() {
+            const yourPlace = { lat: -25.344, lng: 131.036 };
+            map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 4,
+                center: yourPlace,
+                scaleControl: true // Adds a scale control
+            });
+            marker = new google.maps.Marker({ position: yourPlace, map: map });
+        }
+
+        // Teleport the map to a given latitude and longitude
+        function teleport() {
+            const latInput = document.getElementById('latitude').value;
+            const lngInput = document.getElementById('longitude').value;
+            let position;
+
+            if (latInput && lngInput) {
+                position = { lat: parseFloat(latInput), lng: parseFloat(lngInput) };
+            } else {
+                const selectedLocation = document.getElementById('location-select').value.split(',');
+                if (selectedLocation.length === 2) {
+                    position = { lat: parseFloat(selectedLocation[0]), lng: parseFloat(selectedLocation[1]) };
+                }
+            }
+
+            if (position) {
+                map.setCenter(position);
+                marker.setPosition(position);
+            }
+        }
+    </script>
+        <script async defer
+            src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}&callback=initMap">
+            </script>
+    </div>
+</body>
+
+</html>

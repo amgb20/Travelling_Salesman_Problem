@@ -4,6 +4,7 @@ import io
 import base64
 
 from django.shortcuts import render, redirect
+from django.conf import settings
 from .forms import TSPForm
 from . import SimpleGrid
 from django.http import HttpResponse
@@ -14,6 +15,11 @@ def home(request):
 
 def tspp_results(request):
     return render(request, 'tspp_results.html')
+
+def mapview(request):
+    context = {'GOOGLE_MAPS_API_KEY': settings.GOOGLE_MAPS_API_KEY}
+    return render(request, 'map.html', context)
+
 
 def path_coordinates_to_csv_string(path, coordinates):
     ordered_coordinates = coordinates[path]

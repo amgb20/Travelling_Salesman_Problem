@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 
 # Generate random waypoints
 def generate_waypoints(num_waypoints):
-    return np.random.rand(num_waypoints, 2)
+    return np.random.rand(num_waypoints, 2) 
 
 # Calculate distance matrix
 def calculate_distance_matrix(waypoints):

@@ -1,11 +1,16 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { GoogleMap, LoadScript, useLoadScript } from '@react-google-maps/api';
 import './MapComponent.css';
+import { useState, useCallback, useRef, useEffect } from 'react';
+import { GoogleMap, LoadScript, useLoadScript } from '@react-google-maps/api';
+import './MapComponent.css';
+
 
 
 const MapComponent = () => {
   const [rectangle, setRectangle] = useState(null);
-  const [isDrawingMode, setIsDrawingMode] = useState(false);
+  const [isDrawingMode, setIsDrawingMode] = useState(true); // Added isDrawingMode state
+  const [isRectangleEditable, setIsRectangleEditable] = useState(true);
   const mapRef = useRef();
   const drawingManagerRef = useRef();
 
@@ -26,14 +31,18 @@ const MapComponent = () => {
       rectangleRef.current.setMap(null);
     }
     rectangleRef.current = rectangle;
+    rectangle.setEditable(isRectangleEditable); // Set the editable option
   };
 
-
   const handleDrawingModeClick = () => {
-    setIsDrawingMode((prevState) => !prevState);
-    drawingManagerRef.current.setOptions({
-      drawingMode: isDrawingMode ? null : window.google.maps.drawing.OverlayType.RECTANGLE,
-    });
+    setIsDrawingMode((prevMode) => !prevMode); // Toggle drawing mode
+    if (drawingManagerRef.current) {
+      drawingManagerRef.current.setOptions({
+        drawingMode: isDrawingMode
+          ? window.google.maps.drawing.OverlayType.RECTANGLE
+          : null,
+      });
+    }
   };
 
   const handleButtonClick = () => {
@@ -48,61 +57,50 @@ const MapComponent = () => {
     const se = new window.google.maps.LatLng(sw.lat(), ne.lng());
 
     const coordinates = `The GPS coordinates of the rectangle corners are:
-      NE: ${ne.lat()}, ${ne.lng()}
-      NW: ${nw.lat()}, ${nw.lng()}
-      SW: ${sw.lat()}, ${sw.lng()}
-      SE: ${se.lat()}, ${se.lng()}`;
+    NE: ${ne.lat()}, ${ne.lng()}
+    NW: ${nw.lat()}, ${nw.lng()}
+    SW: ${sw.lat()}, ${sw.lng()}
+    SE: ${se.lat()}, ${se.lng()}`;
 
     document.getElementById('coordinatesDisplay').value = coordinates;
+
+    setIsRectangleEditable(false);
   };
 
 
   const onMapLoad = useCallback((map) => {
     mapRef.current = map;
     const drawingManager = new window.google.maps.drawing.DrawingManager({
-      drawingMode: window.google.maps.drawing.OverlayType.RECTANGLE,
+      drawingMode: isDrawingMode
+        ? window.google.maps.drawing.OverlayType.RECTANGLE
+        : null,
       drawingControl: false,
       rectangleOptions: {
         draggable: true,
-        editable: true,
+        editable: isRectangleEditable, // Set the initial editable option
         zIndex: 1,
+        fillColor: '#00f', // Set the fill color to blue
+        fillOpacity: 0.3, // Set the fill opacity
       },
     });
     drawingManager.setMap(map);
     drawingManagerRef.current = drawingManager;
-    window.google.maps.event.addListener(drawingManager, 'rectanglecomplete', onRectangleComplete);
-  }, [onRectangleComplete]);
+    window.google.maps.event.addListener(
+      drawingManager,
+      'rectanglecomplete',
+      onRectangleComplete
+    );
+  }, [isDrawingMode, isRectangleEditable]);
 
   const { isLoaded } = useLoadScript({
     googleMapsApiKey: 'AIzaSyDB6rg5lFeylHpR2NHnP0PdgXPoIiwslc4',
     libraries: ['drawing'],
   });
 
-  // return (
-  //   <div className="map-container">
-  //     {isLoaded ? (
-  //       <>
-  //         <div className="controls-container">
-  //           <button className="button" onClick={handleDrawingModeClick}>
-  //             {isDrawingMode ? 'Stop Drawing' : 'Start Drawing'}
-  //           </button>
-  //           <button className="button" onClick={handleButtonClick}>
-  //             Submit
-  //           </button>
-  //           <textarea id="coordinatesDisplay" readOnly className="coordinates-display" />
-  //         </div>
-  //         <GoogleMap
-  //           mapContainerStyle={mapStyles}
-  //           zoom={13}
-  //           center={defaultCenter}
-  //           onLoad={onMapLoad}
-  //         />
-  //       </>
-  //     ) : (
-  //       <div>Loading...</div>
-  //     )}
-  //   </div>
-  // );
+  useEffect(() => {
+    onMapLoad(mapRef.current); // Call onMapLoad when component mounts
+  }, [onMapLoad]);
+
   return (
     <div>
       {isLoaded ? (
@@ -123,7 +121,7 @@ const MapComponent = () => {
               mapContainerStyle={mapStyles}
               zoom={13}
               center={defaultCenter}
-              onLoad={onMapLoad}
+              onLoad={() => onMapLoad(mapRef.current, isRectangleEditable)}
             />
           </div>
         </>
