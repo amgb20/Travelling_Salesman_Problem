@@ -141,6 +141,7 @@
                 <br>
                 <input type="button" id="export-points" value="Export Points" onclick="exportPoints()" disabled>
                 <input type="button" id="export-path" value="Export Path" onclick="exportPath()" disabled>
+                <input type="button" id="export-path-gazebo" value="Export Path Gazebo" onclick="exportPathGazebo()" disabled>
 
                 <!-- change this line and the function-->
             </form>
@@ -346,9 +347,7 @@
             document.getElementById('solve-tsp').disabled = true; // Disable the Solve TSP button
             document.getElementById('export-points').disabled = true; // Disable the export button
             document.getElementById('export-path').disabled = true; // Disable the export button
-
-
-
+            document.getElementById('export-path-gazebo').disabled = true; // Disable the export button
 
 
         }
@@ -372,6 +371,8 @@
             document.getElementById('solve-tsp').disabled = false; // Enable the Solve TSP button
             document.getElementById('export-points').disabled = false; // Enable the export button
             document.getElementById('export-path').disabled = false; // Enable the export button
+            document.getElementById('export-path-gazebo').disabled = false; // Enable the export button
+
         }
 
         function resetDrawing() {
@@ -535,6 +536,43 @@
             link.setAttribute("download", "path.csv");
             link.click(); // This will download the data file named "path.csv".
         }
+
+        function exportPathGazebo() {
+            let csvContent = "data:text/csv;charset=utf-8,";
+
+            // Set the first point as the origin (0, 0, 0)
+            let origin = optimalRoute[0];
+            csvContent += `Point ${origin.id},0,0,0\r\n`;
+
+            // Convert and export the remaining points
+            for (let i = 1; i < optimalRoute.length; i++) {
+                let point = optimalRoute[i];
+                let dx, dy, dz;
+
+                // Convert latitude and longitude differences to position coordinates (dx, dy) in meters
+                let d_lat = point.lat - origin.lat;
+                let d_lng = point.lng - origin.lng;
+
+                // Scale the lat and lng differences to desired units (e.g., meters)
+                let scalingFactor = 100; // Adjust this scaling factor as needed
+                dx = d_lng * scalingFactor;
+                dy = d_lat * scalingFactor;
+
+                // Set z-coordinate to a fixed value or compute based on elevation data
+                dz = 0;
+
+                csvContent += `Point ${point.id},${dx},${dy},${dz}\r\n`;
+            }
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "path.csv");
+            link.click(); // This will download the data file named "path.csv".
+        }
+
+
+
 
         // Get the CSRF token Django needs: https://stackoverflow.com/questions/23349883/how-to-pass-csrf-token-to-javascript-file-in-django
         function getCookie(name) {

@@ -84,11 +84,11 @@ def solve_tsp(request):
 
         # Create distance matrix
         distance_matrix = []
-        for location_1 in locations:
+        for location_1 in locations: # for each location in the list of locations
             row = []
-            for location_2 in locations:
+            for location_2 in locations: # for each location in the list of locations
                 row.append(int(geodesic(
-                    (location_1['lat'], location_1['lng']), (location_2['lat'], location_2['lng'])).meters))
+                    (location_1['lat'], location_1['lng']), (location_2['lat'], location_2['lng'])).meters)) # append the distance between the two locations
             distance_matrix.append(row)
 
             print('distance_matrix', distance_matrix)
@@ -139,36 +139,36 @@ def solve_tsp(request):
     return JsonResponse({'error': 'Invalid request'}, status=400)
 
 
-def compute_distance_matrix(locations):
-    num_locations = len(locations)
-    dist_matrix = []
-    ordered_points = []
+# def compute_distance_matrix(locations):
+#     num_locations = len(locations)
+#     dist_matrix = []
+#     ordered_points = []
 
-    for location in locations:
-        ordered_points.append(location)
+#     for location in locations:
+#         ordered_points.append(location)
 
-    for i in range(num_locations):
-        dist_matrix_row = []
-        for j in range(num_locations):
-            if i == j:
-                dist_matrix_row.append(0)
-            else:
-                lat1, lon1 = ordered_points[i]['lat'], ordered_points[i]['lng']
-                lat2, lon2 = ordered_points[j]['lat'], ordered_points[j]['lng']
-                radius = 6371  # radius of the Earth in kilometers
+#     for i in range(num_locations):
+#         dist_matrix_row = []
+#         for j in range(num_locations):
+#             if i == j:
+#                 dist_matrix_row.append(0)
+#             else:
+#                 lat1, lon1 = ordered_points[i]['lat'], ordered_points[i]['lng']
+#                 lat2, lon2 = ordered_points[j]['lat'], ordered_points[j]['lng']
+#                 radius = 6371  # radius of the Earth in kilometers
 
-                dlat = math.radians(lat2-lat1)
-                dlon = math.radians(lon2-lon1)
+#                 dlat = math.radians(lat2-lat1)
+#                 dlon = math.radians(lon2-lon1)
 
-                a = math.sin(dlat/2) * math.sin(dlat/2) + math.cos(math.radians(lat1)) \
-                    * math.cos(math.radians(lat2)) * math.sin(dlon/2) * math.sin(dlon/2)
-                c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
+#                 a = math.sin(dlat/2) * math.sin(dlat/2) + math.cos(math.radians(lat1)) \
+#                     * math.cos(math.radians(lat2)) * math.sin(dlon/2) * math.sin(dlon/2)
+#                 c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
 
-                distance = radius * c * 1000  # Convert the distance to meters
-                dist_matrix_row.append(distance)
-        dist_matrix.append(dist_matrix_row)
+#                 distance = radius * c * 1000  # Convert the distance to meters
+#                 dist_matrix_row.append(distance)
+#         dist_matrix.append(dist_matrix_row)
 
-    return dist_matrix, ordered_points
+#     return dist_matrix, ordered_points
 
 
 def index(request):
