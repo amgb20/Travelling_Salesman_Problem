@@ -72,6 +72,8 @@
             border-radius: 3px;
             cursor: pointer;
             margin-right: 5px;
+            margin-bottom: 10px;
+            /* Add margin-bottom to create space */
         }
 
         input[type="button"]:disabled {
@@ -95,6 +97,12 @@
             border-radius: 3px;
             max-height: 200px;
             overflow-y: auto;
+        }
+
+        #export-points,
+        #export-path {
+            margin-top: 10px;
+            /* Add margin-top to separate from other buttons */
         }
     </style>
 </head>
@@ -130,6 +138,7 @@
                 <input type="button" id="choose-points" value="Choose Points" onclick="choosePoints()" disabled>
                 <input type="button" id="create-grid" value="Create Grid" onclick="createGrid()" disabled>
                 <input type="button" id="solve-tsp" value="Solve TSP" onclick="solveTSP()" disabled>
+                <br>
                 <input type="button" id="export-points" value="Export Points" onclick="exportPoints()" disabled>
                 <input type="button" id="export-path" value="Export Path" onclick="exportPath()" disabled>
 
@@ -468,18 +477,29 @@
                 body: JSON.stringify({ locations: locations })
             })
                 .then(response => response.json()) // Convert the response to JSON
-
                 .then(data => {
                     // Save the optimal route
                     optimalRoute = data.route;
 
+                    // Create an array of markers in the order of the optimal route
+                    let orderedMarkers = optimalRoute.map(routePoint => points.find(point => point.getPosition().lat() === routePoint.lat && point.getPosition().lng() === routePoint.lng));
+
+                    // Iterate over the ordered markers and add each edge to the map with a delay
+                    orderedMarkers.forEach((marker, index) => {
+                        // Add a line between this marker and the next one
+                        if (index < orderedMarkers.length - 1) {
+                            setTimeout(() => {
+                                addLine(map, marker, orderedMarkers[index + 1]);
+                            }, index * 500); // 500ms delay between each line
+                        }
+                    });
+
                     // Create the route array using the returned points
-                    let route = optimalRoute.map((point, index) => `Point ${point.id}: ${point.lat}, ${point.lng}`);
-                    document.getElementById('optimal-route').innerText = route.join(', ');
+                    let route = optimalRoute.map(point => `Point ${point.id}`);
+                    document.getElementById('optimal-route').innerText = route.join('-> ');
 
                     // Display the cost of the optimal route
                     document.getElementById('optimal-cost').innerText = `Cost: ${data.cost} meters`;
-
 
                     // Enable the export buttons
                     document.getElementById('export-points').disabled = false;
@@ -516,11 +536,6 @@
             link.click(); // This will download the data file named "path.csv".
         }
 
-
-
-
-
-
         // Get the CSRF token Django needs: https://stackoverflow.com/questions/23349883/how-to-pass-csrf-token-to-javascript-file-in-django
         function getCookie(name) {
             let cookieValue = null;
@@ -536,6 +551,25 @@
             }
             return cookieValue;
         }
+
+        function addLine(map, marker1, marker2) {
+            const lineCoordinates = [
+                { lat: marker1.getPosition().lat(), lng: marker1.getPosition().lng() },
+                { lat: marker2.getPosition().lat(), lng: marker2.getPosition().lng() },
+            ];
+
+            const linePath = new google.maps.Polyline({
+                path: lineCoordinates,
+                geodesic: true,
+                strokeColor: "#800080", // purple
+                strokeOpacity: 1.0,
+                strokeWeight: 4,
+            });
+
+            linePath.setMap(map);
+        }
+
+
 
 
         window.initMap = initMap;

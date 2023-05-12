@@ -91,6 +91,8 @@ def solve_tsp(request):
                     (location_1['lat'], location_1['lng']), (location_2['lat'], location_2['lng'])).meters))
             distance_matrix.append(row)
 
+            print('distance_matrix', distance_matrix)
+
         # Create data model
         data = {}
         data['distance_matrix'] = distance_matrix
