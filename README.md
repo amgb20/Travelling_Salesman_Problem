@@ -40,4 +40,4 @@ flowchart TB;
 ```
 
 # This is the react web interface to choose the sampling point coordinate in Africa
-![alt text](/TSPP/website_gif.gif "User Interface")
+![alt text](/TSPP/website.gif "User Interface")
