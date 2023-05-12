@@ -14,6 +14,7 @@ from django.http import FileResponse
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from ortools.constraint_solver import routing_enums_pb2, pywrapcp
+from geopy.distance import geodesic
 
 
 def home(request):
@@ -77,52 +78,63 @@ def download_cpu_usages_csv(request, algorithm, Length, Width):
 # https://developers.google.com/optimization/routing/tsp -- this comes from directly from OR-tools a google tsp solver developed in python
 @csrf_exempt
 def solve_tsp(request):
-    if request.method == 'POST':
+    if request.method == "POST":
         data = json.loads(request.body)
         locations = data['locations']
 
-        # Compute the distance matrix and ordered list of points
-        matrix, ordered_points = compute_distance_matrix(locations)
+        # Create distance matrix
+        distance_matrix = []
+        for location_1 in locations:
+            row = []
+            for location_2 in locations:
+                row.append(int(geodesic(
+                    (location_1['lat'], location_1['lng']), (location_2['lat'], location_2['lng'])).meters))
+            distance_matrix.append(row)
 
-        print("matrix: ", matrix)
-        print("ordered_points: ", ordered_points)
+        # Create data model
+        data = {}
+        data['distance_matrix'] = distance_matrix
+        data['num_vehicles'] = 1
+        data['depot'] = 0
 
-        # Use OR-Tools to solve the TSP
-        manager = pywrapcp.RoutingIndexManager(len(matrix), 1, 0)
+        # Create the routing index manager
+        manager = pywrapcp.RoutingIndexManager(
+            len(data['distance_matrix']), data['num_vehicles'], data['depot'])
+
+        # Create routing model
         routing = pywrapcp.RoutingModel(manager)
 
         def distance_callback(from_index, to_index):
-            return matrix[manager.IndexToNode(from_index)][manager.IndexToNode(to_index)]
+            return data['distance_matrix'][manager.IndexToNode(from_index)][manager.IndexToNode(to_index)]
 
         transit_callback_index = routing.RegisterTransitCallback(
             distance_callback)
+
+        # Define cost of each arc
         routing.SetArcCostEvaluatorOfAllVehicles(transit_callback_index)
 
+        # Set search parameters
         search_parameters = pywrapcp.DefaultRoutingSearchParameters()
         search_parameters.first_solution_strategy = (
-            routing_enums_pb2.FirstSolutionStrategy.AUTOMATIC)
+            routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC)
+
+        # Solve the problem
         solution = routing.SolveWithParameters(search_parameters)
 
         if solution:
             route = []
             index = routing.Start(0)
             while not routing.IsEnd(index):
-                route.append(manager.IndexToNode(index))
+                route.append(locations[manager.IndexToNode(index)])
+                previous_index = index
                 index = solution.Value(routing.NextVar(index))
-            route.append(manager.IndexToNode(index))
 
-            # Rotate route until the first point in the route matches the first point in the input list
-            while route[0] != 0:
-                route = route[1:] + route[:1]
+            return JsonResponse({
+                'route': route,
+                'cost': solution.ObjectiveValue(),
+            })
 
-            # Create the response
-            response = []
-            for point_index in route:
-                response.append(ordered_points[point_index])
-
-            return JsonResponse({'route': response})
-
-    return JsonResponse({'error': 'Invalid request method'}, status=400)
+    return JsonResponse({'error': 'Invalid request'}, status=400)
 
 
 def compute_distance_matrix(locations):
@@ -150,7 +162,7 @@ def compute_distance_matrix(locations):
                     * math.cos(math.radians(lat2)) * math.sin(dlon/2) * math.sin(dlon/2)
                 c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
 
-                distance = radius * c
+                distance = radius * c * 1000  # Convert the distance to meters
                 dist_matrix_row.append(distance)
         dist_matrix.append(dist_matrix_row)
 

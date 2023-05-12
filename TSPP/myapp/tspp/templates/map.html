@@ -20,6 +20,8 @@
             width: 50%;
             height: 100%;
             border: 1px solid #ccc;
+            position: sticky;
+            top: 0;
         }
 
         /* Set the size of the div element that contains the map */
@@ -35,6 +37,8 @@
             padding: 20px;
             background-color: #f5f5f5;
             border-right: 1px solid #ccc;
+            overflow-y: auto;
+            max-height: 100vh;
         }
 
         .left h2 {
@@ -95,6 +99,8 @@
     </style>
 </head>
 
+
+
 <body>
     <div id="container">
         <div class="left">
@@ -143,6 +149,11 @@
                 <h2>Optimal route: </h2>
                 <div id="optimal-route"></div>
             </div>
+            <div id="points-container">
+                <h2>Optimal cost: </h2>
+                <div id="optimal-cost"></div>
+            </div>
+
         </div>
 
         <div id="map-container">
@@ -447,7 +458,6 @@
                 return { id: index + 1, lat: point.getPosition().lat(), lng: point.getPosition().lng() };
             });
 
-
             // Send the locations to the server
             fetch('/solve-tsp/', {
                 method: 'POST',
@@ -457,7 +467,7 @@
                 },
                 body: JSON.stringify({ locations: locations })
             })
-                .then(response => response.json())
+                .then(response => response.json()) // Convert the response to JSON
 
                 .then(data => {
                     // Save the optimal route
@@ -466,6 +476,10 @@
                     // Create the route array using the returned points
                     let route = optimalRoute.map((point, index) => `Point ${point.id}: ${point.lat}, ${point.lng}`);
                     document.getElementById('optimal-route').innerText = route.join(', ');
+
+                    // Display the cost of the optimal route
+                    document.getElementById('optimal-cost').innerText = `Cost: ${data.cost} meters`;
+
 
                     // Enable the export buttons
                     document.getElementById('export-points').disabled = false;
