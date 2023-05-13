@@ -9,6 +9,9 @@ python3 manage.py runserver
 
 # This is the file structure
 
+# This is the django web interface to choose coordinates and run the TSP algorithms
+![alt text](/TSPP/website.gif "User Interface")
+
 # This what to expect from the user interface
 ![alt text](/TSPP/website.png "User Interface")
 
@@ -39,5 +42,4 @@ flowchart TB;
 
 ```
 
-# This is the react web interface to choose the sampling point coordinate in Africa
-![alt text](/TSPP/website.gif "User Interface")
+

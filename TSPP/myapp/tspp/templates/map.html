@@ -129,6 +129,10 @@
                 <div>
                     <input type="number" id="grid-size" name="grid-size" min="1">
                 </div>
+                <label for="grid-size">Random Points:</label>
+                <div>
+                    <input type="number" id="num-points" name="Ramdom Points" min="1">
+                </div>
                 <br>
                 <input type="button" value="Go" onclick="teleport()">
                 <input type="button" id="start" value="Start Demarcate" onclick="startDrawing()">
@@ -141,14 +145,15 @@
                 <br>
                 <input type="button" id="export-points" value="Export Points" onclick="exportPoints()" disabled>
                 <input type="button" id="export-path" value="Export Path" onclick="exportPath()" disabled>
-                <input type="button" id="export-path-gazebo" value="Export Path Gazebo" onclick="exportPathGazebo()" disabled>
+                <input type="button" id="export-path-gazebo" value="Export Path Gazebo" onclick="exportPathGazebo()"
+                    disabled>
 
                 <!-- change this line and the function-->
             </form>
             <h2>Rectangle coordinates:</h2>
             <div id="rectangle-coordinates"></div>
             <div>
-                <h2>Rectangle Perimeter:</h2>
+                <h2>Rectangle Area:</h2>
                 <div id="rectangle-perimeter"></div>
             </div>
             <div id="points-container">
@@ -172,10 +177,13 @@
     </div>
 
     <script>
-        let map, marker, rectangle, drawingManager, infoWindow;
+        let map, marker, rectangle, boundaries, drawingManager, infoWindow;
         let points = [];
         let gridLines = [];
         let optimalRoute = [];
+        let tracingMode = false;
+        let linePaths = [];
+
 
         // Initialize the map
         function initMap() {
@@ -332,8 +340,8 @@
             // Add an event listener to update the coordinate display as the rectangle is moved or resized
             rectangle.addListener('bounds_changed', showNewRect);
 
-            // Call the calculatePerimeter function to update the perimeter display
-            rectangle.addListener('bounds_changed', calculatePerimeter);
+            // Call the calculateArea function to update the perimeter display
+            rectangle.addListener('bounds_changed', calculateArea);
 
             // Add a click listener to the map
             map.addListener('click', placePoint);
@@ -372,6 +380,27 @@
             document.getElementById('export-points').disabled = false; // Enable the export button
             document.getElementById('export-path').disabled = false; // Enable the export button
             document.getElementById('export-path-gazebo').disabled = false; // Enable the export button
+
+            // Generate the random points
+            const numPoints = document.getElementById('num-points').value;
+            const bounds = rectangle.getBounds();
+            for (let i = 0; i < numPoints; i++) {
+                // Generate a random point within the rectangle
+                const lat = Math.random() * (bounds.getNorthEast().lat() - bounds.getSouthWest().lat()) + bounds.getSouthWest().lat();
+                const lng = Math.random() * (bounds.getNorthEast().lng() - bounds.getSouthWest().lng()) + bounds.getSouthWest().lng();
+
+                // Place the point on the map
+                const point = new google.maps.Marker({
+                    position: { lat: lat, lng: lng },
+                    map: map,
+                    label: `${points.length + 1}`
+                });
+
+                points.push(point);
+
+                // Update the points display
+                document.getElementById('points').innerHTML += 'Point ' + (points.length) + ': ' + point.position.toString() + '<br>';
+            }
 
         }
 
@@ -417,6 +446,13 @@
             // Enable the "Create Grid" button
             document.getElementById('create-grid').disabled = false;
 
+            // Remove each line from the map
+            for (let i = 0; i < linePaths.length; i++) {
+                linePaths[i].setMap(null);
+            }
+
+            linePaths.splice(0, linePaths.length);
+
         }
 
         /** Show the new coordinates for the rectangle in an info window. */
@@ -439,18 +475,25 @@
         }
 
         // Calculate the perimeter of the rectangle
-        function calculatePerimeter() {
+        function calculateArea() {
+
             const ne = rectangle.getBounds().getNorthEast();
-            const nw = new google.maps.LatLng(ne.lat(), rectangle.getBounds().getSouthWest().lng());
             const sw = rectangle.getBounds().getSouthWest();
-            const se = new google.maps.LatLng(sw.lat(), rectangle.getBounds().getNorthEast().lng());
 
-            const latPerimeter = google.maps.geometry.spherical.computeDistanceBetween(sw, nw); // Perimeter along latitude in meters
-            const lngPerimeter = google.maps.geometry.spherical.computeDistanceBetween(nw, ne); // Perimeter along longitude in meters
+            const latLength = google.maps.geometry.spherical.computeDistanceBetween(
+                new google.maps.LatLng(ne.lat(), sw.lng()),
+                new google.maps.LatLng(ne.lat(), ne.lng())
+            ); // Length along latitude in meters
 
-            const perimeter = 2 * (latPerimeter + lngPerimeter); // Perimeter in meters
+            const lngLength = google.maps.geometry.spherical.computeDistanceBetween(
+                new google.maps.LatLng(sw.lat(), sw.lng()),
+                new google.maps.LatLng(ne.lat(), sw.lng())
+            ); // Length along longitude in meters
 
-            document.getElementById('rectangle-perimeter').innerHTML = '<p>Perimeter is: <strong>' + perimeter.toLocaleString() + ' meters&sup2;</strong></p>';
+            const area = latLength * lngLength; // Area in square meters
+            const areakm = area / 1000000; // Area in square kilometers
+
+            document.getElementById('rectangle-perimeter').innerHTML = '<p>Area is: <strong>' + area.toLocaleString() + ' meters&sup2;</strong>' + ' | ' + areakm.toLocaleString() + ' km&sup2;</strong></p>';
         }
 
         // Resize the rectangle to fit the viewport
@@ -491,7 +534,7 @@
                         if (index < orderedMarkers.length - 1) {
                             setTimeout(() => {
                                 addLine(map, marker, orderedMarkers[index + 1]);
-                            }, index * 500); // 500ms delay between each line
+                            }, index * 250); // 500ms delay between each line
                         }
                     });
 
@@ -571,9 +614,6 @@
             link.click(); // This will download the data file named "path.csv".
         }
 
-
-
-
         // Get the CSRF token Django needs: https://stackoverflow.com/questions/23349883/how-to-pass-csrf-token-to-javascript-file-in-django
         function getCookie(name) {
             let cookieValue = null;
@@ -605,10 +645,11 @@
             });
 
             linePath.setMap(map);
+
+            // Store the line path in the linePath array
+            linePaths.push(linePath);
+
         }
-
-
-
 
         window.initMap = initMap;
 
