@@ -104,10 +104,42 @@
             margin-top: 10px;
             /* Add margin-top to separate from other buttons */
         }
+
+        #toggle-lines {
+            padding: 8px 16px;
+            background-color: #ff0000;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            margin-right: 5px;
+            margin-bottom: 10px;
+        }
+
+        #toggle-lines:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        #hide-markers {
+            padding: 8px 16px;
+            background-color: #ff0000;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            margin-right: 5px;
+            margin-bottom: 10px;
+        }
+
+        #hide-markers:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        
     </style>
 </head>
-
-
 
 <body>
     <div id="container">
@@ -152,6 +184,9 @@
                 <input type="button" id="export-path" value="Export Path" onclick="exportPath()" disabled>
                 <input type="button" id="export-path-gazebo" value="Export Path Gazebo" onclick="exportPathGazebo()"
                     disabled>
+                <button id="toggle-lines">Hide Lines</button>
+                <button id="hide-markers">Hide Markers</button>
+
 
                 <!-- change this line and the function-->
             </form>
@@ -166,12 +201,20 @@
                 <div id="points"></div>
             </div>
             <div id="points-container">
-                <h2>Optimal route: </h2>
+                <h2>Optimal route without stopping to charging station: </h2>
                 <div id="optimal-route"></div>
             </div>
             <div id="points-container">
-                <h2>Optimal cost: </h2>
+                <h2>Optimal route with stopping to charging station: </h2>
+                <div id=""></div>
+            </div>
+            <div id="points-container">
+                <h2>Optimal cost without stopping to charging station: </h2>
                 <div id="optimal-cost"></div>
+            </div>
+            <div id="points-container">
+                <h2>Optimal cost with stopping to charging station: </h2>
+                <div id=""></div>
             </div>
 
         </div>
@@ -189,6 +232,87 @@
         let optimalRoute = [];
         let tracingMode = false;
         let linePaths = [];
+        let linesVisible = true;
+        let markersVisible = true;
+        let oocMarkers = [];
+        let cslMarkers = [];
+
+
+        const toggleLinesButton = document.getElementById('toggle-lines');
+
+        // Add event listener to handle button click
+        toggleLinesButton.addEventListener('click', function (event) {
+            event.preventDefault(); // Prevent form submission
+
+            // Toggle the visibility of the lines
+            if (linesVisible) {
+                // Lines are currently visible, hide them
+                hideLines();
+                toggleLinesButton.textContent = 'Reactivate Lines';
+            } else {
+                // Lines are currently hidden, reactivate them
+                reactivateLines();
+                toggleLinesButton.textContent = 'Hide Lines';
+            }
+
+            // Toggle the linesVisible variable
+            linesVisible = !linesVisible;
+        });
+
+        // Function to hide the lines
+        function hideLines() {
+            linePaths.forEach(function (linePath) {
+                linePath.setMap(null);
+            });
+        }
+
+        // Function to reactivate the lines
+        function reactivateLines() {
+            linePaths.forEach(function (linePath) {
+                linePath.setMap(map);
+            });
+        }
+
+        const hideMarkersButton = document.getElementById('hide-markers');
+
+        // Add event listener to handle button click
+        hideMarkersButton.addEventListener('click', function (event) {
+            event.preventDefault(); // Prevent form submission
+
+            // Toggle the visibility of the markers
+            if (markersVisible) {
+                // Markers are currently visible, hide them
+                hideMarkers();
+                hideMarkersButton.textContent = 'Reactivate Markers';
+            } else {
+                // Markers are currently hidden, reactivate them
+                reactivateMarkers();
+                hideMarkersButton.textContent = 'Hide Markers';
+            }
+
+            // Toggle the markersVisible variable
+            markersVisible = !markersVisible;
+        });
+
+        // Function to hide the markers
+        function hideMarkers() {
+            oocMarkers.forEach(function (marker) {
+                marker.setMap(null);
+            });
+            cslMarkers.forEach(function (marker) {
+                marker.setMap(null);
+            });
+        }
+
+        // Function to reactivate the markers
+        function reactivateMarkers() {
+            oocMarkers.forEach(function (marker) {
+                marker.setMap(map);
+            });
+            cslMarkers.forEach(function (marker) {
+                marker.setMap(map);
+            });
+        }
 
         // Initialize the map
         function initMap() {
@@ -549,22 +673,26 @@
 
                     // out_of_charge_points is an array of dictionaries
                     data.out_of_charge_points.forEach(point => {
-                        new google.maps.Marker({
+                        const oocpMarker = new google.maps.Marker({
                             position: new google.maps.LatLng(point.lat, point.lng),
                             map: map,
                             title: 'Out of Charge',
                             icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png'
                         });
+
+                        oocMarkers.push(oocpMarker);
                     });
 
                     // charging_station_location is an array of dictionaries
                     if (data.charging_station_location) {
-                        new google.maps.Marker({
+                        cslMarker = new google.maps.Marker({
                             position: new google.maps.LatLng(data.charging_station_location.lat, data.charging_station_location.lng),
                             map: map,
                             title: 'Charging Station',
-                            icon: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png'
+                            icon: 'http://maps.google.com/mapfiles/ms/icons/yellow-dot.png'
                         });
+
+                        cslMarkers.push(cslMarker);
                     }
 
 

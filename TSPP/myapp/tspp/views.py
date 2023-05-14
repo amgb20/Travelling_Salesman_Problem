@@ -17,6 +17,8 @@ from django.views.decorators.csrf import csrf_exempt
 from ortools.constraint_solver import routing_enums_pb2, pywrapcp
 from geopy.distance import geodesic
 
+from math import radians, sin, cos, asin, sqrt, atan2
+
 # addiding the cvrp.py file
 from .ROMIE_Out_Of_Charge_Points import compute_out_of_charge_points
 from shapely.geometry import Polygon 
@@ -194,10 +196,35 @@ def solve_tsp(request):
             # Calculate the total cost by summing the distances
             total_cost = sum(distances)
 
+            def calculate_distance(point1, point2):
+                lat1 = radians(point1['lat'])
+                lon1 = radians(point1['lng'])
+                lat2 = radians(point2['lat'])
+                lon2 = radians(point2['lng'])
+
+                # Radius of the Earth in kilometers
+                earth_radius = 6371.0
+
+                # Haversine formula
+                dlon = lon2 - lon1
+                dlat = lat2 - lat1
+                a = sin(dlat / 2)**2 + cos(lat1) * cos(lat2) * sin(dlon / 2)**2
+                c = 2 * atan2(sqrt(a), sqrt(1 - a))
+                distance = earth_radius * c
+
+                return distance*2
+
+            # Calculate the total distance from each out_of_charge point to the charging station
+            total_distance = 0.0
+            for point in out_of_charge_points:
+                distance_to_charging_station = calculate_distance(point, charging_station_location)
+                total_distance += distance_to_charging_station
+
             print('out_of_charge_points', out_of_charge_points)
             print('charging_station_location', charging_station_location)
             print('distances', distances)
             print('cost', total_cost)
+            print('ooc-cs', total_distance)
 
             return JsonResponse({
                 'route': route,
