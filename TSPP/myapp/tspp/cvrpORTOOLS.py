@@ -14,7 +14,7 @@ import numpy as np
     - out_of_charge_points: A list of dictionaries with 'lat' and 'lng' as keys for out_of_charge points.
     """
 
-def compute_charge_points(route, distances, capacity, rectangle_bounds):
+def compute_out_of_charge_points(route, distances, capacity):
     out_of_charge_points = []
     remaining_capacity = capacity
     last_station_location = route[0]  # Starts fully charged at the depot
@@ -41,14 +41,7 @@ def compute_charge_points(route, distances, capacity, rectangle_bounds):
         # Move to the next waypoint
         current_location = route[i+1]
 
-    # Use an optimization approach to find the best location for the charging station within the rectangle bounds.
-    # This is a placeholder for the actual optimization code.
-    charging_station = {
-        'lat': (rectangle_bounds['lat_min'] + rectangle_bounds['lat_max']) / 2,
-        'lng': (rectangle_bounds['lng_min'] + rectangle_bounds['lng_max']) / 2,
-    }
-
-    return charging_station, out_of_charge_points
+    return out_of_charge_points
 
 
 

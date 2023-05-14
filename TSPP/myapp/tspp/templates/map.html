@@ -121,9 +121,9 @@
                 <label for="location-select">Or select a location:</label>
                 <select id="location-select">
                     <option value="">--Select a Location--</option>
-                    <option value="-33.8688,151.2093">Sydney</option>
-                    <option value="51.5074,-0.1278">London</option>
-                    <option value="40.7128,-74.0060">New York</option>
+                    <option value="11.993775, 1.413218">Boungo Mine - Burkina Faso</option>
+                    <option value="6.877534, -8.106013">Ity Mine - Ivory Coast</option>
+                    <option value="12.000584, -3.412255">Mana Mine - Burkina Faso</option>
                 </select>
                 <label for="grid-size">Grid Size:</label>
                 <div>
@@ -133,6 +133,11 @@
                 <div>
                     <input type="number" id="num-points" name="Ramdom Points" min="1">
                 </div>
+                <label>ROMIE Capacity:</label>
+                <div>
+                    <input type="number" id="capacity-input" name="ROMIE Capacity" min="1">
+                </div>
+
                 <br>
                 <input type="button" value="Go" onclick="teleport()">
                 <input type="button" id="start" value="Start Demarcate" onclick="startDrawing()">
@@ -141,7 +146,7 @@
                 <input type="button" id="resize" value="Resize" onclick="resizeMap()" disabled>
                 <input type="button" id="choose-points" value="Choose Points" onclick="choosePoints()" disabled>
                 <input type="button" id="create-grid" value="Create Grid" onclick="createGrid()" disabled>
-                <input type="button" id="solve-tsp" value="Solve TSP" onclick="solveTSP()" disabled>
+                <input type="button" id="solve-tsp" value="Solve TSP" disabled>
                 <br>
                 <input type="button" id="export-points" value="Export Points" onclick="exportPoints()" disabled>
                 <input type="button" id="export-path" value="Export Path" onclick="exportPath()" disabled>
@@ -184,7 +189,6 @@
         let optimalRoute = [];
         let tracingMode = false;
         let linePaths = [];
-
 
         // Initialize the map
         function initMap() {
@@ -512,16 +516,8 @@
                 return { id: index + 1, lat: point.getPosition().lat(), lng: point.getPosition().lng() };
             });
 
-            // Get the bounds of the rectangle
-            const bounds = rectangle.getBounds();
-
-            // Prepare the rectangle_bounds to send to the server
-            let rectangle_bounds = {
-                lat_min: bounds.getSouthWest().lat(),
-                lat_max: bounds.getNorthEast().lat(),
-                lng_min: bounds.getSouthWest().lng(),
-                lng_max: bounds.getNorthEast().lng()
-            };
+            const capacityInput = document.getElementById('capacity-input');
+            const capacity = parseInt(capacityInput.value);
 
             // Send the locations to the server
             fetch('/solve-tsp/', {
@@ -530,7 +526,7 @@
                     'Content-Type': 'application/json',
                     'X-CSRFToken': getCookie('csrftoken')  // This gets the CSRF token Django needs
                 },
-                body: JSON.stringify({ locations: locations, rectangle_bounds: rectangle_bounds })
+                body: JSON.stringify({ locations: locations , capacity: capacity })
             })
                 .then(response => response.json()) // Convert the response to JSON
                 .then(data => {
@@ -550,14 +546,6 @@
                         }
                     });
 
-                    // added line
-                    // If charge_points is a dictionary with 'lat' and 'lng' properties
-                    new google.maps.Marker({
-                        position: new google.maps.LatLng(data.charge_points.lat, data.charge_points.lng),
-                        map: map,
-                        title: 'Charging Station',
-                        icon: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png'
-                    });
 
                     // out_of_charge_points is an array of dictionaries
                     data.out_of_charge_points.forEach(point => {
@@ -580,6 +568,8 @@
                     // Enable the export buttons
                     document.getElementById('export-points').disabled = false;
                     document.getElementById('export-path').disabled = false;
+
+
                 });
 
 

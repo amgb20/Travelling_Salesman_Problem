@@ -19,7 +19,7 @@ from geopy.distance import geodesic
 
 # addiding the cvrp.py file
 from .cvrpGA import cvrp
-from .cvrpORTOOLS import compute_charge_points
+from .cvrpORTOOLS import compute_out_of_charge_points
 
 
 def home(request):
@@ -86,7 +86,8 @@ def solve_tsp(request):
     if request.method == "POST":
         data = json.loads(request.body)
         locations = data['locations']
-        rectangle_bound = data['rectangle_bounds']
+        capacity = data['capacity']
+        # rectangle_bound = data['rectangle_bounds']
 
         # Create distance matrix
         distance_matrix = []
@@ -144,13 +145,12 @@ def solve_tsp(request):
             
             # added line
 
-            capacity = 1000
-            charging_station, out_of_charge_points = compute_charge_points(route, distances, capacity, rectangle_bound)
+            capacity
+            out_of_charge_points = compute_out_of_charge_points(route, distances, capacity)
 
             # Calculate the total cost by summing the distances
             total_cost = sum(distances)
-            
-            print('charge_points', charging_station)
+
             print('out_of_charge_points', out_of_charge_points)
             print('distances', distances)
             print('cost', total_cost)
@@ -159,7 +159,6 @@ def solve_tsp(request):
                 'route': route,
                 'distances': distances,
                 'cost': total_cost,
-                'charge_points': charging_station,
                 'out_of_charge_points': out_of_charge_points,
             })
 
