@@ -131,11 +131,11 @@
                 </div>
                 <label for="grid-size">Random Points:</label>
                 <div>
-                    <input type="number" id="num-points" name="Ramdom Points" min="1">
+                    <input type="number" id="num-points" name="Ramdom Points" min="1" value="5">
                 </div>
                 <label>ROMIE Capacity:</label>
                 <div>
-                    <input type="number" id="capacity-input" name="ROMIE Capacity" min="1">
+                    <input type="number" id="capacity-input" name="ROMIE Capacity" min="1" value="1000">
                 </div>
 
                 <br>
@@ -526,7 +526,7 @@
                     'Content-Type': 'application/json',
                     'X-CSRFToken': getCookie('csrftoken')  // This gets the CSRF token Django needs
                 },
-                body: JSON.stringify({ locations: locations , capacity: capacity })
+                body: JSON.stringify({ locations: locations, capacity: capacity })
             })
                 .then(response => response.json()) // Convert the response to JSON
                 .then(data => {
@@ -556,6 +556,17 @@
                             icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png'
                         });
                     });
+
+                    // charging_station_location is an array of dictionaries
+                    if (data.charging_station_location) {
+                        new google.maps.Marker({
+                            position: new google.maps.LatLng(data.charging_station_location.lat, data.charging_station_location.lng),
+                            map: map,
+                            title: 'Charging Station',
+                            icon: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png'
+                        });
+                    }
+
 
 
                     // Create the route array using the returned points

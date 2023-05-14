@@ -18,8 +18,8 @@ from ortools.constraint_solver import routing_enums_pb2, pywrapcp
 from geopy.distance import geodesic
 
 # addiding the cvrp.py file
-from .cvrpGA import cvrp
-from .cvrpORTOOLS import compute_out_of_charge_points
+from .ROMIE_Out_Of_Charge_Points import compute_out_of_charge_points
+from shapely.geometry import Polygon 
 
 
 def home(request):
@@ -144,14 +144,58 @@ def solve_tsp(request):
             
             
             # added line
-
-            capacity
             out_of_charge_points = compute_out_of_charge_points(route, distances, capacity)
+
+            # Calculate the centroid of the out of charge points
+            # https://en.wikipedia.org/wiki/Centroid 
+            # def calculate_centroid(points):
+            #     lats = [p['lat'] for p in points]
+            #     lngs = [p['lng'] for p in points]
+            #     centroid = {'lat': sum(lats) / len(points), 'lng': sum(lngs) / len(points)}
+            #     return centroid
+            # https://stackoverflow.com/questions/2792443/finding-the-centroid-of-a-polygon 
+            def calculate_polygon_centroid(points):
+                # if points is inferior or equal to 4, then the centroid is the average of the points
+                if len(points) <= 4:
+                    lats = [p['lat'] for p in points]
+                    lngs = [p['lng'] for p in points]
+                    centroid = {'lat': sum(lats) / len(points), 'lng': sum(lngs) / len(points)}
+                    return centroid
+                else:
+                    area = 0.0
+                    x_center = 0.0
+                    y_center = 0.0
+
+                    a = len(points)
+                    points = points + [points[0]]  # repeat the first point to create a 'closed loop'
+
+                    for i in range(a):
+                        xi, yi = points[i]['lat'], points[i]['lng']
+                        xi1, yi1 = points[i + 1]['lat'], points[i + 1]['lng']
+
+                        # calculate the signed area contribution of the current point
+                        fi = xi * yi1 - xi1 * yi
+                        area += fi
+                        x_center += (xi + xi1) * fi
+                        y_center += (yi + yi1) * fi
+
+                    area *= 0.5
+
+                    if area == 0.0:
+                        return None
+
+                    x_center /= (6.0 * area)
+                    y_center /= (6.0 * area)
+
+                    return {'lat': x_center, 'lng': y_center}
+
+            charging_station_location = calculate_polygon_centroid(out_of_charge_points)
 
             # Calculate the total cost by summing the distances
             total_cost = sum(distances)
 
             print('out_of_charge_points', out_of_charge_points)
+            print('charging_station_location', charging_station_location)
             print('distances', distances)
             print('cost', total_cost)
 
@@ -160,6 +204,7 @@ def solve_tsp(request):
                 'distances': distances,
                 'cost': total_cost,
                 'out_of_charge_points': out_of_charge_points,
+                'charging_station_location': charging_station_location,
             })
 
     return JsonResponse({'error': 'Invalid request'}, status=400)
