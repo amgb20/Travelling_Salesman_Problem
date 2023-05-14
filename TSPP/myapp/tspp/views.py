@@ -4,6 +4,7 @@ import io
 import base64
 import json
 import math
+import random
 
 from django.shortcuts import render, redirect
 from django.conf import settings
@@ -15,6 +16,10 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from ortools.constraint_solver import routing_enums_pb2, pywrapcp
 from geopy.distance import geodesic
+
+# addiding the cvrp.py file
+from .cvrpGA import cvrp
+from .cvrpORTOOLS import compute_charge_points
 
 
 def home(request):
@@ -81,17 +86,18 @@ def solve_tsp(request):
     if request.method == "POST":
         data = json.loads(request.body)
         locations = data['locations']
+        rectangle_bound = data['rectangle_bounds']
 
         # Create distance matrix
         distance_matrix = []
-        for location_1 in locations: # for each location in the list of locations
+        for location_1 in locations:  # for each location in the list of locations
             row = []
-            for location_2 in locations: # for each location in the list of locations
+            for location_2 in locations:  # for each location in the list of locations
                 row.append(int(geodesic(
-                    (location_1['lat'], location_1['lng']), (location_2['lat'], location_2['lng'])).meters)) # append the distance between the two locations
+                    (location_1['lat'], location_1['lng']), (location_2['lat'], location_2['lng'])).meters))  # append the distance between the two locations
             distance_matrix.append(row)
 
-            print('distance_matrix', distance_matrix)
+            # print('distance_matrix', distance_matrix)
 
         # Create data model
         data = {}
@@ -125,19 +131,39 @@ def solve_tsp(request):
 
         if solution:
             route = []
+            distances = []
             index = routing.Start(0)
             while not routing.IsEnd(index):
                 route.append(locations[manager.IndexToNode(index)])
                 previous_index = index
                 index = solution.Value(routing.NextVar(index))
+                if not routing.IsEnd(index):
+                    distances.append(data['distance_matrix'][previous_index][index])
+
+            
+            
+            # added line
+
+            capacity = 1000
+            charging_station, out_of_charge_points = compute_charge_points(route, distances, capacity, rectangle_bound)
+
+            # Calculate the total cost by summing the distances
+            total_cost = sum(distances)
+            
+            print('charge_points', charging_station)
+            print('out_of_charge_points', out_of_charge_points)
+            print('distances', distances)
+            print('cost', total_cost)
 
             return JsonResponse({
                 'route': route,
-                'cost': solution.ObjectiveValue(),
+                'distances': distances,
+                'cost': total_cost,
+                'charge_points': charging_station,
+                'out_of_charge_points': out_of_charge_points,
             })
 
     return JsonResponse({'error': 'Invalid request'}, status=400)
-
 
 
 def index(request):

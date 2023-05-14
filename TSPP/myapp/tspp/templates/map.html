@@ -174,6 +174,7 @@
         <div id="map-container">
             <div id="map"></div>
         </div>
+
     </div>
 
     <script>
@@ -511,6 +512,17 @@
                 return { id: index + 1, lat: point.getPosition().lat(), lng: point.getPosition().lng() };
             });
 
+            // Get the bounds of the rectangle
+            const bounds = rectangle.getBounds();
+
+            // Prepare the rectangle_bounds to send to the server
+            let rectangle_bounds = {
+                lat_min: bounds.getSouthWest().lat(),
+                lat_max: bounds.getNorthEast().lat(),
+                lng_min: bounds.getSouthWest().lng(),
+                lng_max: bounds.getNorthEast().lng()
+            };
+
             // Send the locations to the server
             fetch('/solve-tsp/', {
                 method: 'POST',
@@ -518,7 +530,7 @@
                     'Content-Type': 'application/json',
                     'X-CSRFToken': getCookie('csrftoken')  // This gets the CSRF token Django needs
                 },
-                body: JSON.stringify({ locations: locations })
+                body: JSON.stringify({ locations: locations, rectangle_bounds: rectangle_bounds })
             })
                 .then(response => response.json()) // Convert the response to JSON
                 .then(data => {
@@ -534,9 +546,29 @@
                         if (index < orderedMarkers.length - 1) {
                             setTimeout(() => {
                                 addLine(map, marker, orderedMarkers[index + 1]);
-                            }, index * 250); // 500ms delay between each line
+                            }, index * 250); // 250ms delay between each line
                         }
                     });
+
+                    // added line
+                    // If charge_points is a dictionary with 'lat' and 'lng' properties
+                    new google.maps.Marker({
+                        position: new google.maps.LatLng(data.charge_points.lat, data.charge_points.lng),
+                        map: map,
+                        title: 'Charging Station',
+                        icon: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png'
+                    });
+
+                    // out_of_charge_points is an array of dictionaries
+                    data.out_of_charge_points.forEach(point => {
+                        new google.maps.Marker({
+                            position: new google.maps.LatLng(point.lat, point.lng),
+                            map: map,
+                            title: 'Out of Charge',
+                            icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png'
+                        });
+                    });
+
 
                     // Create the route array using the returned points
                     let route = optimalRoute.map(point => `Point ${point.id}`);
