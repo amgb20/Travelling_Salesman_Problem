@@ -136,6 +136,20 @@
             background-color: #ccc;
             cursor: not-allowed;
         }
+
+        .form-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .form-group label {
+            margin-right: 10px;
+        }
+
+        .form-group .input-field {
+            margin-right: 10px;
+        }
     </style>
 </head>
 
@@ -152,24 +166,24 @@
                 <select id="location-select">
                     <option value="">--Select a Location--</option>
                     <option value="11.993775, 1.413218">Boungo Mine - Burkina Faso</option>
-                    <option value="6.877534, -8.106013">Ity Mine - Ivory Coast</option>
+                    <option value="6.8748500171393445, -8.10307329891968">Ity Mine - Ivory Coast</option>
                     <option value="12.000584, -3.412255">Mana Mine - Burkina Faso</option>
                 </select>
-                <label for="grid-size">Grid Size:</label>
-                <div>
-                    <input type="number" id="grid-size" name="grid-size" min="1">
-                </div>
-                <label for="grid-size">Random Points:</label>
-                <div>
-                    <input type="number" id="num-points" name="Ramdom Points" min="4" value="">
-                </div>
-                <label>ROMIE Capacity:</label>
-                <div>
-                    <input type="number" id="capacity-input" name="ROMIE Capacity" min="1" value="1000">
+                <input type="button" value="Go" onclick="teleport()">
+                <div class="form-group">
+                    <label for="grid-size">Grid Size:</label>
+                    <input type="number" id="grid-size" name="grid-size" min="1" class="input-field">
+
+                    <label for="num-points">Random Points:</label>
+                    <input type="number" id="num-points" name="Random Points" min="4" value="" class="input-field">
+
+                    <label for="capacity-input">ROMIE Capacity:</label>
+                    <input type="number" id="capacity-input" name="ROMIE Capacity" min="1" value="1000"
+                        class="input-field">
                 </div>
 
                 <br>
-                <input type="button" value="Go" onclick="teleport()">
+
                 <input type="button" id="start" value="Start Demarcate" onclick="startDrawing()">
                 <input type="button" id="stop" value="Stop Demarcate" onclick="stopDrawing()" disabled>
                 <input type="button" id="reset" value="Reset" onclick="resetDrawing()" disabled>
@@ -182,7 +196,16 @@
                 <input type="button" id="export-path" value="Export Path" onclick="exportPath()" disabled>
                 <input type="button" id="export-path-gazebo" value="Export Path Gazebo" onclick="exportPathGazebo()"
                     disabled>
+                <select id="predefined-data-select">
+                    <option value="tsp20">TSP20</option>
+                    <option value="tsp50">TSP50</option>
+                    <option value="tsp100">TSP100</option>
+                    <option value="tsp200">TSP200</option>
+                    <option value="tsp500">TSP500</option>
+                </select>
+
                 <input type="button" id="own-data" value="Use Own Data" onclick="ownData()">
+
 
                 <button id="toggle-lines">Hide Lines</button>
                 <button id="hide-markers">Hide Markers</button>
@@ -202,12 +225,24 @@
             </div>
             <div id="points-container">
                 <h2>Optimal route: </h2>
+                <div id="progress-bar"></div>
                 <div id="optimal-route"></div>
             </div>
             <div id="points-container">
                 <h2>Optimal cost: </h2>
                 <div id="optimal-cost"></div>
             </div>
+            <div id="points-container">
+                <h2>Job to be done in: </h2>
+                <div id="optimal-time"></div>
+            </div>
+            <div id="points-container">
+                <h2>Max battery reserve distance:</h2>
+                <div id="max-reserve-distance"></div>
+            </div>
+
+
+
 
         </div>
 
@@ -217,7 +252,11 @@
 
     </div>
 
+    <!-- Include the ProgressBar.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/progressbar.js/dist/progressbar.min.js"></script>
+
     <script>
+
         let map, marker, rectangle, boundaries, drawingManager, infoWindow;
         let points = [];
         let gridLines = [];
@@ -230,32 +269,60 @@
         let cslMarkers = [];
         let pathWithChargingStations = [];
 
-        // this is my 15 points testbench
-        let predefinedLocations = [
-            { lat: 44.5474520356833, lng: -78.5374334275837 },
-            { lat: 44.5551912555326, lng: -78.544627425933 },
-            { lat: 44.5380884153786, lng: -78.5484025914099 },
-            { lat: 44.5451546021788, lng: -78.5360838236916 },
-            { lat: 44.5367714555196, lng: -78.5414448634013 },
-            { lat: 44.5393103020037, lng: -78.5320729714972 },
-            { lat: 44.5380895590729, lng: -78.5328601918095 },
-            { lat: 44.5541025845604, lng: -78.5301444211056 },
-            { lat: 44.5464320494035, lng: -78.545840468605 },
-            { lat: 44.5401710749569, lng: -78.5359506767182 },
-            { lat: 44.5415150815918, lng: -78.5346904566408 },
-            { lat: 44.5488794941345, lng: -78.5430521704597 },
-            { lat: 44.5430032685835, lng: -78.5329913415683 },
-            { lat: 44.5440688118581, lng: -78.5306626062108 },
-            { lat: 44.5551865408976, lng: -78.5477346048269 }
-        ];
+        let progressBar;
+        let progress = 0;
+
+
+        // TestBench Creation
+        let predefinedLocations = {
+            tsp20: [
+                { lat: 44.5474520356833, lng: -78.5374334275837 },
+                { lat: 44.5551912555326, lng: -78.544627425933 },
+                { lat: 44.5380884153786, lng: -78.5484025914099 },
+                { lat: 44.5451546021788, lng: -78.5360838236916 },
+                { lat: 44.5367714555196, lng: -78.5414448634013 },
+                { lat: 44.5393103020037, lng: -78.5320729714972 },
+                { lat: 44.5380895590729, lng: -78.5328601918095 },
+                { lat: 44.5541025845604, lng: -78.5301444211056 },
+                { lat: 44.5464320494035, lng: -78.545840468605 },
+                { lat: 44.5401710749569, lng: -78.5359506767182 },
+                { lat: 44.5415150815918, lng: -78.5346904566408 },
+                { lat: 44.5488794941345, lng: -78.5430521704597 },
+                { lat: 44.5430032685835, lng: -78.5329913415683 },
+                { lat: 44.5440688118581, lng: -78.5306626062108 },
+                { lat: 44.5551865408976, lng: -78.5477346048269 }
+            ],
+            tsp50: [
+                { lat: 44.5474520356833, lng: -78.5374334275837 },
+
+
+            ],
+
+            tsp100: [
+
+            ],
+
+            tsp200: [
+
+            ],
+
+            tsp500: [
+
+            ],
+
+        };
+
 
         function ownData() {
+            // Get the selected data set
+            let selectedDataSet = document.getElementById('predefined-data-select').value;
+
             // Clear existing points if any
             points.forEach((point) => point.setMap(null));
             points = [];
 
             // Place markers at predefined locations
-            predefinedLocations.forEach((location, index) => {
+            predefinedLocations[selectedDataSet].forEach((location, index) => {
                 const point = new google.maps.Marker({
                     position: { lat: location.lat, lng: location.lng },
                     map: map,
@@ -491,10 +558,10 @@
             // Calculate bounds around the current center of the map
             let center = map.getCenter();
             const bounds = {
-                north: center.lat() + 0.01,
-                south: center.lat() - 0.01,
-                east: center.lng() + 0.01,
-                west: center.lng() - 0.01
+                north: center.lat() + 0.015,
+                south: center.lat() - 0.015,
+                east: center.lng() + 0.015,
+                west: center.lng() - 0.015
             };
 
             // Create a rectangle and add it to the map
@@ -678,10 +745,25 @@
         }
 
         document.getElementById('solve-tsp').addEventListener('click', function () {
+
+            // Initialize the progress bar
+            const progressBar = new ProgressBar.Line('#progress-bar', { color: '#007bff' });
+            progressBar.animate(1); // Start the progress bar animation
+
             // Prepare the data to send to the server
             let locations = points.map(function (point, index) {
                 return { id: index + 1, lat: point.getPosition().lat(), lng: point.getPosition().lng() };
             });
+
+            // Specs of the robot based on https://clearpathrobotics.com/warthog-unmanned-ground-vehicle-robot/
+            // --- Speed in m/h ---
+            const speed = 10000;
+
+            // --- Run time in hours ---
+            const runTime = 5;
+
+            // --- Range in km ---
+            const range = speed * runTime;
 
             const capacityInput = document.getElementById('capacity-input');
             const capacity = parseInt(capacityInput.value);
@@ -785,12 +867,15 @@
                     let maxReserveDistance = Math.max(...Object.values(reserveDistances));
                     console.log('Maximum reserve distance:', maxReserveDistance);
 
+                    document.getElementById('max-reserve-distance').innerText = `Max: ${maxReserveDistance} meters`;
+
 
                     // Now use pathWithChargingStations instead of orderedMarkers to generate the path
                     pathWithChargingStations.forEach((marker, index) => {
                         if (index < pathWithChargingStations.length - 1) {
                             setTimeout(() => {
                                 addLine(map, marker, pathWithChargingStations[index + 1]);
+                                progressBar.set(index / (pathWithChargingStations.length - 2)); // Update the progress bar value
                             }, index * 1000); // Xms delay between each line
                         }
                     });
@@ -845,6 +930,27 @@
 
                     // Display the cost of the optimal route
                     document.getElementById('optimal-cost').innerText = `Cost: ${data.cost} meters`;
+
+
+                    // Calculate the hours, minutes, and seconds
+                    // reference: https://stackoverflow.com/questions/19700283/how-to-convert-time-milliseconds-to-hours-min-sec-format-in-javascript
+
+                    const jobdone = data.cost / speed;
+
+                    const hours = Math.floor(jobdone);
+                    const minutes = Math.floor((jobdone % 1) * 60);
+                    const seconds = Math.floor(((jobdone % 1) * 60 % 1) * 60);
+
+                    // Format the time as hh:mm:ss
+                    const formattedTime = `${padZero(hours)}:${padZero(minutes)}:${padZero(seconds)}`;
+
+                    // Display the formatted time
+                    document.getElementById('optimal-time').innerText = `Time: ${formattedTime}`;
+
+                    // Function to pad single-digit numbers with a leading zero
+                    function padZero(number) {
+                        return number.toString().padStart(2, '0');
+                    }
 
                     // Enable the export buttons
                     document.getElementById('export-points').disabled = false;

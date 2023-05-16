@@ -5,6 +5,7 @@ import base64
 import json
 import math
 import random
+import csv
 
 from django.shortcuts import render, redirect
 from django.conf import settings
@@ -21,7 +22,7 @@ from math import radians, sin, cos, asin, sqrt, atan2
 
 # addiding the cvrp.py file
 from .ROMIE_Out_Of_Charge_Points import compute_out_of_charge_points
-from shapely.geometry import Polygon 
+from shapely.geometry import Polygon
 
 
 def home(request):
@@ -100,7 +101,16 @@ def solve_tsp(request):
                     (location_1['lat'], location_1['lng']), (location_2['lat'], location_2['lng'])).meters))  # append the distance between the two locations
             distance_matrix.append(row)
 
-            # print('distance_matrix', distance_matrix)
+            print('distance_matrix', distance_matrix)
+
+
+        # Save distance matrix to a CSV file
+        filename = 'distance_matrix.csv'
+        with open(filename, 'w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerows(distance_matrix)
+
+        print(f'Distance matrix saved to {filename}')
 
         # Create data model
         data = {}
@@ -124,6 +134,7 @@ def solve_tsp(request):
         # Define cost of each arc
         routing.SetArcCostEvaluatorOfAllVehicles(transit_callback_index)
 
+        # ------------------ For First solution strategy ------------------ #
         # Set search parameters
         search_parameters = pywrapcp.DefaultRoutingSearchParameters()
         search_parameters.first_solution_strategy = (
@@ -141,27 +152,29 @@ def solve_tsp(request):
                 previous_index = index
                 index = solution.Value(routing.NextVar(index))
                 if not routing.IsEnd(index):
-                    distances.append(data['distance_matrix'][previous_index][index])
+                    distances.append(data['distance_matrix']
+                                     [previous_index][index])
 
-            
-            
             # added line
-            out_of_charge_points = compute_out_of_charge_points(route, distances, capacity)
+            out_of_charge_points = compute_out_of_charge_points(
+                route, distances, capacity)
 
             # Calculate the centroid of the out of charge points
-            # https://en.wikipedia.org/wiki/Centroid 
+            # https://en.wikipedia.org/wiki/Centroid
             # def calculate_centroid(points):
             #     lats = [p['lat'] for p in points]
             #     lngs = [p['lng'] for p in points]
             #     centroid = {'lat': sum(lats) / len(points), 'lng': sum(lngs) / len(points)}
             #     return centroid
-            # https://stackoverflow.com/questions/2792443/finding-the-centroid-of-a-polygon 
+            # https://stackoverflow.com/questions/2792443/finding-the-centroid-of-a-polygon
+
             def calculate_polygon_centroid(points):
                 # if points is inferior or equal to 4, then the centroid is the average of the points
                 if len(points) <= 4:
                     lats = [p['lat'] for p in points]
                     lngs = [p['lng'] for p in points]
-                    centroid = {'lat': sum(lats) / len(points), 'lng': sum(lngs) / len(points)}
+                    centroid = {'lat': sum(
+                        lats) / len(points), 'lng': sum(lngs) / len(points)}
                     return centroid
                 else:
                     area = 0.0
@@ -169,7 +182,8 @@ def solve_tsp(request):
                     y_center = 0.0
 
                     a = len(points)
-                    points = points + [points[0]]  # repeat the first point to create a 'closed loop'
+                    # repeat the first point to create a 'closed loop'
+                    points = points + [points[0]]
 
                     for i in range(a):
                         xi, yi = points[i]['lat'], points[i]['lng']
@@ -191,7 +205,8 @@ def solve_tsp(request):
 
                     return {'lat': x_center, 'lng': y_center}
 
-            charging_station_location = calculate_polygon_centroid(out_of_charge_points)
+            charging_station_location = calculate_polygon_centroid(
+                out_of_charge_points)
 
             # Calculate the total cost by summing the distances
             total_cost = sum(distances)
@@ -217,7 +232,8 @@ def solve_tsp(request):
             # Calculate the total distance from each out_of_charge point to the charging station
             total_distance = 0.0
             for point in out_of_charge_points:
-                distance_to_charging_station = calculate_distance(point, charging_station_location)
+                distance_to_charging_station = calculate_distance(
+                    point, charging_station_location)
                 total_distance += distance_to_charging_station
 
             print('out_of_charge_points', out_of_charge_points)
@@ -235,6 +251,26 @@ def solve_tsp(request):
             })
 
     return JsonResponse({'error': 'Invalid request'}, status=400)
+
+class IterationMonitor(pywrapcp.SearchMonitor):
+    def __init__(self, solver, routing, manager, data):
+        super().__init__(solver)
+        self.routing = routing
+        self.manager = manager
+        self.data = data
+        self.iterations = []
+        self.costs = []
+
+    def BeginNextDecision(self, b):
+        # Record the iteration number and the cost of the current solution
+        index = self.routing.Start(0)
+        cost = 0
+        while not self.routing.IsEnd(index):
+            cost += self.data['distance_matrix'][self.manager.IndexToNode(index)][self.manager.IndexToNode(self.routing.NextVar(index).Value())]
+            index = self.routing.NextVar(index).Value()
+        self.iterations.append(self.solver().iterations())
+        self.costs.append(cost)
+        return True  # Continue the search
 
 
 def index(request):
