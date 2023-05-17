@@ -2,11 +2,93 @@
 <html>
 
 <head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.0/themes/smoothness/jquery-ui.css">
+
     <style>
+        /* 12 */
+        .btn-12 {
+            position: relative;
+            right: 20px;
+            bottom: 20px;
+            border: none;
+            box-shadow: none;
+            width: 130px;
+            height: 40px;
+            line-height: 42px;
+            -webkit-perspective: 230px;
+            perspective: 230px;
+        }
+
+        .btn-12 span {
+            background: rgb(0, 172, 238);
+            background: linear-gradient(0deg, rgba(0, 172, 238, 1) 0%, rgba(2, 126, 251, 1) 100%);
+            display: block;
+            position: absolute;
+            width: 130px;
+            height: 40px;
+            box-shadow: inset 2px 2px 2px 0px rgba(255, 255, 255, .5),
+                7px 7px 20px 0px rgba(0, 0, 0, .1),
+                4px 4px 5px 0px rgba(0, 0, 0, .1);
+            border-radius: 5px;
+            margin: 0;
+            text-align: center;
+            -webkit-box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            box-sizing: border-box;
+            -webkit-transition: all .3s;
+            transition: all .3s;
+        }
+
+        .btn-12 span:nth-child(1) {
+            box-shadow:
+                -7px -7px 20px 0px #fff9,
+                -4px -4px 5px 0px #fff9,
+                7px 7px 20px 0px #0002,
+                4px 4px 5px 0px #0001;
+            -webkit-transform: rotateX(90deg);
+            -moz-transform: rotateX(90deg);
+            transform: rotateX(90deg);
+            -webkit-transform-origin: 50% 50% -20px;
+            -moz-transform-origin: 50% 50% -20px;
+            transform-origin: 50% 50% -20px;
+        }
+
+        .btn-12 span:nth-child(2) {
+            -webkit-transform: rotateX(0deg);
+            -moz-transform: rotateX(0deg);
+            transform: rotateX(0deg);
+            -webkit-transform-origin: 50% 50% -20px;
+            -moz-transform-origin: 50% 50% -20px;
+            transform-origin: 50% 50% -20px;
+        }
+
+        .btn-12:hover span:nth-child(1) {
+            box-shadow: inset 2px 2px 2px 0px rgba(255, 255, 255, .5),
+                7px 7px 20px 0px rgba(0, 0, 0, .1),
+                4px 4px 5px 0px rgba(0, 0, 0, .1);
+            -webkit-transform: rotateX(0deg);
+            -moz-transform: rotateX(0deg);
+            transform: rotateX(0deg);
+        }
+
+        .btn-12:hover span:nth-child(2) {
+            box-shadow: inset 2px 2px 2px 0px rgba(255, 255, 255, .5),
+                7px 7px 20px 0px rgba(0, 0, 0, .1),
+                4px 4px 5px 0px rgba(0, 0, 0, .1);
+            color: transparent;
+            -webkit-transform: rotateX(-90deg);
+            -moz-transform: rotateX(-90deg);
+            transform: rotateX(-90deg);
+        }
+
         body {
             margin: 0;
             padding: 0;
-            font-family: Arial, sans-serif;
+            /* apply a Roboto font */
+            font-family: 'Roboto', sans-serif;
+            color: rgba(0, 0, 0, 0.87);
+            font-weight: 400;
         }
 
         #container {
@@ -150,97 +232,318 @@
         .form-group .input-field {
             margin-right: 10px;
         }
+
+        .info-button {
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 10px;
+            color: grey;
+        }
+
+        .info-button:hover {
+            color: #007BFF;
+        }
+
+        .info-button:focus {
+            outline: none;
+        }
+
+        #title-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            margin-top: 20px;
+        }
+
+        .left-content {
+            flex: 1;
+            margin-right: 20px;
+            /* Adjust as needed */
+        }
+
+        .right-content {
+            /* Adjust as needed */
+            display: flex;
+            align-items: center;
+        }
+
+        #dialog-box {
+            display: none;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #ccc;
+            margin: 20px 0;
+        }
+
+        p {
+            text-align: justify;
+        }
+
+        .teleport-section {
+            border: 2px solid green;
+            border-radius: 10px;
+            padding: 20px;
+            background-color: transparent;
+            margin-bottom: 20px;
+        }
+
+        .teleport-section label,
+        .teleport-section input,
+        .teleport-section select,
+        .teleport-section input[type="button"] {
+            margin-bottom: 10px;
+        }
+
+        .input-button-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .input-button-container input[type="number"] {
+            width: 70px;
+        }
+
+        .input-button-container input[type="button"] {
+            margin-left: 10px;
+        }
+
+        .input-button-container select {
+            margin-right: 10px;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+        input:checked+.slider {
+            background-color: green;
+        }
+
+        input:focus+.slider {
+            box-shadow: 0 0 1px green;
+        }
+
+        input:checked+.slider:before {
+            -webkit-transform: translateX(26px);
+            -ms-transform: translateX(26px);
+            transform: translateX(26px);
+        }
+
+        /* Rounded sliders */
+        .slider.round {
+            border-radius: 34px;
+        }
+
+        .slider.round:before {
+            border-radius: 50%;
+        }
     </style>
 </head>
 
 <body>
+    <div id="dialog-box" title="Information" style="display: none;">
+        <!-- insert image romie.png which one directory up -->
+        <img src="../../../romie.png" alt="A cute kitten" style="width: 100%; max-width: 300px; margin-bottom: 20px;">
+    </div>
     <div id="container">
         <div class="left">
-            <h2>Teleport To:</h2>
-            <form id="teleport-form">
-                <label for="latitude">Latitude:</label>
-                <input type="text" id="latitude" name="latitude">
-                <label for="longitude">Longitude:</label>
-                <input type="text" id="longitude" name="longitude">
-                <label for="location-select">Or select a location:</label>
-                <select id="location-select">
-                    <option value="">--Select a Location--</option>
-                    <option value="11.993775, 1.413218">Boungo Mine - Burkina Faso</option>
-                    <option value="6.8748500171393445, -8.10307329891968">Ity Mine - Ivory Coast</option>
-                    <option value="12.000584, -3.412255">Mana Mine - Burkina Faso</option>
-                </select>
-                <input type="button" value="Go" onclick="teleport()">
-                <div class="form-group">
+            <section id="title-section">
+                <div class="left-content">
+                    <h2>ROMIE Travelling Salesman Solver</h2>
+                    <p>
+                        This is a Prospector Robotics LTD user interface and a solver for the Travelling Salesman
+                        Problem.
+                        Click on the "i" icon to understand
+                        how to use this site.
+                    </p>
+                </div>
+                <div class="right-content">
+                    <a href="https://github.com/amgb20/Travelling_Salesman_Problem" target="_blank" class="info-button"
+                        title="My GitHub Repository">
+                        <i class="fab fa-github fa-bounce"></i>
+                    </a>
+                    <button class="info-button" title="General site information">
+                        <i class="fas fa-info-circle"></i>
+                    </button>
+
+                </div>
+            </section>
+            <hr>
+
+            <section id="teleport-section" class="teleport-section">
+                <h2>Teleport To</h2>
+                <form id="teleport-form">
+                    <label for="latitude">Latitude:</label>
+                    <input type="text" id="latitude" name="latitude">
+                    <label for="longitude">Longitude:</label>
+                    <input type="text" id="longitude" name="longitude">
+                    <label for="location-select">Or select a mine location:</label>
+                    <select id="location-select">
+                        <option value="">--Select a Location--</option>
+                        <option value="11.993775, 1.413218">Boungo Mine - Burkina Faso</option>
+                        <option value="6.8748500171393445, -8.10307329891968">Ity Mine - Ivory Coast</option>
+                        <option value="12.000584, -3.412255">Mana Mine - Burkina Faso</option>
+                    </select>
+                    <input type="button" value="Go" onclick="teleport()">
+                </form>
+            </section>
+
+            <section id="teleport-section" class="teleport-section">
+                <h2>Trace Boundaries of the Prospecting Land</h2>
+                <form id="teleport-form">
+                    <input type="button" id="start" value="Start Demarcate" onclick="startDrawing()">
+                    <input type="button" id="reset" value="Reset" onclick="resetDrawing()" disabled>
+                    <input type="button" id="resize" value="Resize" onclick="resizeMap()" disabled>
+                </form>
+            </section>
+
+            <section id="teleport-section" class="teleport-section">
+                <h2>Generate your points</h2>
+                <form id="teleport-form">
                     <label for="grid-size">Grid Size:</label>
-                    <input type="number" id="grid-size" name="grid-size" min="1" class="input-field">
-
+                    <div class="form-group">
+                        <div class="input-button-container">
+                            <input type="number" id="grid-size" name="grid-size" min="1" class="input-field">
+                            <input type="button" id="create-grid" value="Create Grid" onclick="createGrid()" disabled>
+                        </div>
+                    </div>
                     <label for="num-points">Random Points:</label>
-                    <input type="number" id="num-points" name="Random Points" min="4" value="" class="input-field">
+                    <div class="form-group">
 
-                    <label for="capacity-input">ROMIE Capacity:</label>
+                        <div class="input-button-container">
+                            <input type="number" id="num-points" name="Random Points" min="4" value=""
+                                class="input-field">
+                            <input type="button" id="choose-points" value="Choose Points" onclick="choosePoints()"
+                                disabled>
+                        </div>
+                    </div>
+                    <label for="location-select">Or select a predefined set:</label>
+                    <div class="form-group">
+
+                        <div class="input-button-container">
+                            <select id="predefined-data-select">
+                                <option value="tsp20">TSP20</option>
+                                <option value="tsp50">TSP50</option>
+                                <option value="tsp100">TSP100</option>
+                                <option value="tsp200">TSP200</option>
+                                <option value="tsp500">TSP500</option>
+                            </select>
+                            <input type="button" id="own-data" value="Use Own Data" onclick="ownData()">
+                        </div>
+                    </div>
+                </form>
+            </section>
+
+            <section id="teleport-section" class="teleport-section">
+                <h2>Battery Management</h2>
+                <form id="teleport-form">
+                    <label for="capacity-input">ROMIE Capacity (meters):</label>
                     <input type="number" id="capacity-input" name="ROMIE Capacity" min="1" value="1000"
                         class="input-field">
-                </div>
+                </form>
+            </section>
 
-                <br>
+            <section id="teleport-section" class="teleport-section">
+                <h2>Control Panel</h2>
+                <form id="teleport-form">
+                    <input type="button" id="stop" value="Stop Demarcate" onclick="stopDrawing()" disabled>
+                    <input type="button" id="solve-tsp" value="Solve TSP" disabled>
+                    <label class="switch">
+                        <input type="checkbox" id="toggle-lines" checked>
+                        <span class="slider"></span>
+                    </label>
+                    Hide Lines
 
-                <input type="button" id="start" value="Start Demarcate" onclick="startDrawing()">
-                <input type="button" id="stop" value="Stop Demarcate" onclick="stopDrawing()" disabled>
-                <input type="button" id="reset" value="Reset" onclick="resetDrawing()" disabled>
-                <input type="button" id="resize" value="Resize" onclick="resizeMap()" disabled>
-                <input type="button" id="choose-points" value="Choose Points" onclick="choosePoints()" disabled>
-                <input type="button" id="create-grid" value="Create Grid" onclick="createGrid()" disabled>
-                <input type="button" id="solve-tsp" value="Solve TSP" disabled>
-                <br>
-                <input type="button" id="export-points" value="Export Points" onclick="exportPoints()" disabled>
-                <input type="button" id="export-path" value="Export Path" onclick="exportPath()" disabled>
-                <input type="button" id="export-path-gazebo" value="Export Path Gazebo" onclick="exportPathGazebo()"
-                    disabled>
-                <select id="predefined-data-select">
-                    <option value="tsp20">TSP20</option>
-                    <option value="tsp50">TSP50</option>
-                    <option value="tsp100">TSP100</option>
-                    <option value="tsp200">TSP200</option>
-                    <option value="tsp500">TSP500</option>
-                </select>
+                    <label class="switch">
+                        <input type="checkbox" id="hide-markers" checked>
+                        <span class="slider"></span>
+                    </label>
+                    Hide Markers
+                </form>
+            </section>
 
-                <input type="button" id="own-data" value="Use Own Data" onclick="ownData()">
+            <section id="teleport-section" class="teleport-section">
+                <h2>Download</h2>
+                <form id="teleport-form">
+                    <input type="button" id="export-points" value="Export Points" onclick="exportPoints()" disabled>
+                    <input type="button" id="export-path" value="Export Path" onclick="exportPath()" disabled>
+                    <input type="button" id="export-path-gazebo" value="Export Path Gazebo" onclick="exportPathGazebo()"
+                        disabled>
 
+                </form>
+            </section>
 
-                <button id="toggle-lines">Hide Lines</button>
-                <button id="hide-markers">Hide Markers</button>
+            <section id="teleport-section" class="teleport-section">
+                <h2>Download</h2>
+                <form id="teleport-form">
+                    <h2>Rectangle coordinates:</h2>
+                    <div id="rectangle-coordinates"></div>
+                    <div>
+                        <h2>Rectangle Area:</h2>
+                        <div id="rectangle-perimeter"></div>
+                    </div>
+                    <div id="points-container">
+                        <h2>Points:</h2>
+                        <div id="points"></div>
+                    </div>
+                    <div id="points-container">
+                        <h2>Optimal route: </h2>
+                        <div id="progress-bar"></div>
+                        <div id="optimal-route"></div>
+                    </div>
+                    <div id="points-container">
+                        <h2>Optimal cost: </h2>
+                        <div id="optimal-cost"></div>
+                    </div>
+                    <div id="points-container">
+                        <h2>Job to be done in: </h2>
+                        <div id="optimal-time"></div>
+                    </div>
+                    <div id="points-container">
+                        <h2>Max battery reserve distance:</h2>
+                        <div id="max-reserve-distance"></div>
+                    </div>
 
-
-                <!-- change this line and the function-->
-            </form>
-            <h2>Rectangle coordinates:</h2>
-            <div id="rectangle-coordinates"></div>
-            <div>
-                <h2>Rectangle Area:</h2>
-                <div id="rectangle-perimeter"></div>
-            </div>
-            <div id="points-container">
-                <h2>Points:</h2>
-                <div id="points"></div>
-            </div>
-            <div id="points-container">
-                <h2>Optimal route: </h2>
-                <div id="progress-bar"></div>
-                <div id="optimal-route"></div>
-            </div>
-            <div id="points-container">
-                <h2>Optimal cost: </h2>
-                <div id="optimal-cost"></div>
-            </div>
-            <div id="points-container">
-                <h2>Job to be done in: </h2>
-                <div id="optimal-time"></div>
-            </div>
-            <div id="points-container">
-                <h2>Max battery reserve distance:</h2>
-                <div id="max-reserve-distance"></div>
-            </div>
-
+                </form>
+            </section>
+            <button class="custom-btn btn-12"><span>Click!</span><span>Read More</span></button>
 
 
 
@@ -254,6 +557,26 @@
 
     <!-- Include the ProgressBar.js library -->
     <script src="https://cdn.jsdelivr.net/npm/progressbar.js/dist/progressbar.min.js"></script>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.0/themes/smoothness/jquery-ui.css">
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.js"></script>
+    <script>
+        $(document).ready(function () {
+            $(".info-button").click(function () {
+                $("#dialog-box").dialog({
+                    modal: true,
+                    width: "auto",
+                    buttons: {
+                        OK: function () {
+                            $(this).dialog("close");
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+
 
     <script>
 
@@ -276,38 +599,889 @@
         // TestBench Creation
         let predefinedLocations = {
             tsp20: [
-                { lat: 44.5474520356833, lng: -78.5374334275837 },
-                { lat: 44.5551912555326, lng: -78.544627425933 },
-                { lat: 44.5380884153786, lng: -78.5484025914099 },
-                { lat: 44.5451546021788, lng: -78.5360838236916 },
-                { lat: 44.5367714555196, lng: -78.5414448634013 },
-                { lat: 44.5393103020037, lng: -78.5320729714972 },
-                { lat: 44.5380895590729, lng: -78.5328601918095 },
-                { lat: 44.5541025845604, lng: -78.5301444211056 },
-                { lat: 44.5464320494035, lng: -78.545840468605 },
-                { lat: 44.5401710749569, lng: -78.5359506767182 },
-                { lat: 44.5415150815918, lng: -78.5346904566408 },
-                { lat: 44.5488794941345, lng: -78.5430521704597 },
-                { lat: 44.5430032685835, lng: -78.5329913415683 },
-                { lat: 44.5440688118581, lng: -78.5306626062108 },
-                { lat: 44.5551865408976, lng: -78.5477346048269 }
+                { lat: 6.881150428, lng: -8.106724698 },
+                { lat: 6.870720283, lng: -8.092505875 },
+                { lat: 6.872929838, lng: -8.113895463 },
+                { lat: 6.872849444, lng: -8.114852405 },
+                { lat: 6.863479891, lng: -8.113223646 },
+                { lat: 6.86528747, lng: -8.089133854 },
+                { lat: 6.876126171, lng: -8.115511748 },
+                { lat: 6.889028562, lng: -8.116591061 },
+                { lat: 6.862602196, lng: -8.111885578 },
+                { lat: 6.877572061, lng: -8.091423306 },
+                { lat: 6.882527575, lng: -8.091507597 },
+                { lat: 6.877012767, lng: -8.097081788 },
+                { lat: 6.878382832, lng: -8.109127183 },
+                { lat: 6.888186612, lng: -8.094862945 },
+                { lat: 6.86426022, lng: -8.0941577 },
+                { lat: 6.862969433, lng: -8.101049997 },
+                { lat: 6.88190451, lng: -8.092985257 },
+                { lat: 6.887497021, lng: -8.088815975 },
+                { lat: 6.883868991, lng: -8.104237362 },
+                { lat: 6.863851349, lng: -8.114196075 }
+
             ],
             tsp50: [
-                { lat: 44.5474520356833, lng: -78.5374334275837 },
+                { lat: 6.866836551, lng: -8.097767775 },
+                { lat: 6.864875542, lng: -8.112925612 },
+                { lat: 6.884535366, lng: -8.092241226 },
+                { lat: 6.868906611, lng: -8.091810423 },
+                { lat: 6.874384803, lng: -8.115570095 },
+                { lat: 6.88011108, lng: -8.09332248 },
+                { lat: 6.879294569, lng: -8.094686501 },
+                { lat: 6.885203018, lng: -8.088752056 },
+                { lat: 6.876513461, lng: -8.099706236 },
+                { lat: 6.861192792, lng: -8.109669849 },
+                { lat: 6.86103328, lng: -8.08993731 },
+                { lat: 6.865030403, lng: -8.099652638 },
+                { lat: 6.86906509, lng: -8.103249797 },
+                { lat: 6.883268309, lng: -8.105844551 },
+                { lat: 6.875053429, lng: -8.111134954 },
+                { lat: 6.876098751, lng: -8.097825342 },
+                { lat: 6.882820355, lng: -8.107988353 },
+                { lat: 6.868946714, lng: -8.111150767 },
+                { lat: 6.881502231, lng: -8.09088275 },
+                { lat: 6.884997581, lng: -8.093561539 },
+                { lat: 6.861957404, lng: -8.107305883 },
+                { lat: 6.882544637, lng: -8.116984438 },
+                { lat: 6.867481065, lng: -8.106252971 },
+                { lat: 6.87043987, lng: -8.104671394 },
+                { lat: 6.885795719, lng: -8.103505536 },
+                { lat: 6.871505838, lng: -8.104993913 },
+                { lat: 6.868581016, lng: -8.102509858 },
+                { lat: 6.866102135, lng: -8.088381233 },
+                { lat: 6.862009395, lng: -8.116026827 },
+                { lat: 6.869598092, lng: -8.116543892 },
+                { lat: 6.863795999, lng: -8.102710841 },
+                { lat: 6.887787779, lng: -8.105110934 },
+                { lat: 6.88695825, lng: -8.09959265 },
+                { lat: 6.864916675, lng: -8.103033255 },
+                { lat: 6.875995149, lng: -8.116700848 },
+                { lat: 6.865866218, lng: -8.088454792 },
+                { lat: 6.889775349, lng: -8.111438657 },
+                { lat: 6.862103812, lng: -8.110979189 },
+                { lat: 6.865898176, lng: -8.115134606 },
+                { lat: 6.881160238, lng: -8.103912402 },
+                { lat: 6.875123525, lng: -8.093108055 },
+                { lat: 6.872610674, lng: -8.096597942 },
+                { lat: 6.872144583, lng: -8.114886567 },
+                { lat: 6.886963583, lng: -8.111878763 },
+                { lat: 6.884373519, lng: -8.106752294 },
+                { lat: 6.861907227, lng: -8.110313482 },
+                { lat: 6.866876981, lng: -8.1142065 },
+                { lat: 6.865058993, lng: -8.113634242 },
+                { lat: 6.863513536, lng: -8.09320193 },
+                { lat: 6.889077574, lng: -8.109055171 }
+
+
 
 
             ],
-
             tsp100: [
-
+                { lat: 6.87924850925192, lng: -8.09482293504622 },
+                { lat: 6.86457337038975, lng: -8.09417857831394 },
+                { lat: 6.88815369900536, lng: -8.11708708930488 },
+                { lat: 6.87942225500313, lng: -8.11430357016499 },
+                { lat: 6.88191166276207, lng: -8.11242564793913 },
+                { lat: 6.8896000511524, lng: -8.1130727912193 },
+                { lat: 6.87367707838959, lng: -8.11297716454156 },
+                { lat: 6.87829473442212, lng: -8.10353094175236 },
+                { lat: 6.88202755968416, lng: -8.09773328032066 },
+                { lat: 6.86516750810365, lng: -8.09958941298377 },
+                { lat: 6.86552877398201, lng: -8.10978912142599 },
+                { lat: 6.87058454369206, lng: -8.10762806080951 },
+                { lat: 6.87194787555596, lng: -8.09695312901919 },
+                { lat: 6.86045638175873, lng: -8.0916722393616 },
+                { lat: 6.88758468432512, lng: -8.10381758883939 },
+                { lat: 6.87387507666758, lng: -8.10806696286094 },
+                { lat: 6.8733546223852, lng: -8.10784257610477 },
+                { lat: 6.87648141413346, lng: -8.10101195944453 },
+                { lat: 6.87909151484647, lng: -8.10990015229797 },
+                { lat: 6.86096582290741, lng: -8.09823672926547 },
+                { lat: 6.88959908526973, lng: -8.10182966636267 },
+                { lat: 6.88660856244682, lng: -8.11167882913946 },
+                { lat: 6.86534260536645, lng: -8.09403946934967 },
+                { lat: 6.86776792900154, lng: -8.10315668363174 },
+                { lat: 6.87219746739826, lng: -8.10083961776562 },
+                { lat: 6.87464844561263, lng: -8.10511320644022 },
+                { lat: 6.88094143410877, lng: -8.08984165722958 },
+                { lat: 6.87864807835019, lng: -8.11061326228114 },
+                { lat: 6.86017661583162, lng: -8.11570504725703 },
+                { lat: 6.87186203071561, lng: -8.11602357485421 },
+                { lat: 6.88277052208403, lng: -8.10108490850406 },
+                { lat: 6.86742631374517, lng: -8.11389672056632 },
+                { lat: 6.87269643596249, lng: -8.09624001756401 },
+                { lat: 6.87306691910704, lng: -8.11511141122447 },
+                { lat: 6.87487283348651, lng: -8.09890270626594 },
+                { lat: 6.88247816910036, lng: -8.09698013250272 },
+                { lat: 6.88811355686406, lng: -8.1063632674228 },
+                { lat: 6.87640416458453, lng: -8.10335832974797 },
+                { lat: 6.8696387936929, lng: -8.11361009585455 },
+                { lat: 6.86782417516565, lng: -8.11637010540717 },
+                { lat: 6.87737274869807, lng: -8.10467587620697 },
+                { lat: 6.86019778125606, lng: -8.10169825917192 },
+                { lat: 6.86510129117626, lng: -8.09344248964209 },
+                { lat: 6.86320802439355, lng: -8.08942878282081 },
+                { lat: 6.88980272833203, lng: -8.08835604679965 },
+                { lat: 6.88488630626781, lng: -8.09506693031828 },
+                { lat: 6.87021647348286, lng: -8.0920216169502 },
+                { lat: 6.86358872897693, lng: -8.10498276108503 },
+                { lat: 6.87486595997238, lng: -8.11012099381851 },
+                { lat: 6.87470272716919, lng: -8.11317532747775 },
+                { lat: 6.87602142675573, lng: -8.09919899818419 },
+                { lat: 6.8885744081237, lng: -8.09119678606126 },
+                { lat: 6.86798438221888, lng: -8.10207362474594 },
+                { lat: 6.88316101358735, lng: -8.10987749082367 },
+                { lat: 6.86132746927641, lng: -8.11570778596096 },
+                { lat: 6.88581496544817, lng: -8.1113166537009 },
+                { lat: 6.86565435977263, lng: -8.0969029137862 },
+                { lat: 6.88215515012069, lng: -8.1097558892958 },
+                { lat: 6.87017678873612, lng: -8.10234454417177 },
+                { lat: 6.86732017982141, lng: -8.11717116565836 },
+                { lat: 6.86778393948996, lng: -8.0946185306884 },
+                { lat: 6.88069574945274, lng: -8.09935433779888 },
+                { lat: 6.87335352462766, lng: -8.09667192332023 },
+                { lat: 6.8894087731041, lng: -8.09694124699156 },
+                { lat: 6.88511901751792, lng: -8.09415193668603 },
+                { lat: 6.88652228255872, lng: -8.08947754671006 },
+                { lat: 6.88446751305186, lng: -8.10707156960703 },
+                { lat: 6.86272912386839, lng: -8.11411380625967 },
+                { lat: 6.87935092344644, lng: -8.09699445053961 },
+                { lat: 6.88452059577927, lng: -8.10818731977128 },
+                { lat: 6.86242118277696, lng: -8.10271782840425 },
+                { lat: 6.87409358747434, lng: -8.11388181500933 },
+                { lat: 6.88077520964749, lng: -8.09548060779005 },
+                { lat: 6.88745385534721, lng: -8.10290826558595 },
+                { lat: 6.8602853554389, lng: -8.09642668045277 },
+                { lat: 6.87952438544759, lng: -8.08879551087511 },
+                { lat: 6.87368561354635, lng: -8.09859363376883 },
+                { lat: 6.88718100181372, lng: -8.09143959399646 },
+                { lat: 6.87736618533274, lng: -8.09334967024256 },
+                { lat: 6.86071889998708, lng: -8.10399245733554 },
+                { lat: 6.86766121147024, lng: -8.0924029819342 },
+                { lat: 6.86354830244725, lng: -8.11150196913554 },
+                { lat: 6.86278762697046, lng: -8.11175265520232 },
+                { lat: 6.86971408209016, lng: -8.11534041953195 },
+                { lat: 6.87047162599637, lng: -8.09394838987392 },
+                { lat: 6.88453513154528, lng: -8.09722229354918 },
+                { lat: 6.87098746891464, lng: -8.10609522388824 },
+                { lat: 6.8817532775431, lng: -8.09870466895746 },
+                { lat: 6.88541204043939, lng: -8.107406303363 },
+                { lat: 6.88758448188467, lng: -8.10285225195172 },
+                { lat: 6.8723682336171, lng: -8.09539104400811 },
+                { lat: 6.86891169542497, lng: -8.09884051503266 },
+                { lat: 6.87454321741336, lng: -8.11048066400186 },
+                { lat: 6.8656435780623, lng: -8.10884660274009 },
+                { lat: 6.86581825156381, lng: -8.09710444041205 },
+                { lat: 6.88572057884278, lng: -8.11504025886828 },
+                { lat: 6.86925078273398, lng: -8.10543805908135 },
+                { lat: 6.879573528752, lng: -8.09636434144169 },
+                { lat: 6.88364215829098, lng: -8.10615830029728 },
+                { lat: 6.86166841047567, lng: -8.1004410255348 },
             ],
-
             tsp200: [
-
+                { lat: 6.88383141013269, lng: -8.10031647855696 },
+                { lat: 6.86900849879248, lng: -8.10550847041302 },
+                { lat: 6.87821677140364, lng: -8.09285031271777 },
+                { lat: 6.87382507082192, lng: -8.0949244568295 },
+                { lat: 6.86445387722194, lng: -8.11514822132379 },
+                { lat: 6.87050068073919, lng: -8.09070095926194 },
+                { lat: 6.86347485358271, lng: -8.10836819177739 },
+                { lat: 6.86185830277048, lng: -8.11713822626249 },
+                { lat: 6.8737403778873, lng: -8.09709363664544 },
+                { lat: 6.8661597133565, lng: -8.10333738213057 },
+                { lat: 6.86706534700405, lng: -8.11008172147537 },
+                { lat: 6.86004609544812, lng: -8.11653235451945 },
+                { lat: 6.86532000739306, lng: -8.0976007358258 },
+                { lat: 6.88074195128386, lng: -8.11545125706843 },
+                { lat: 6.87656937093488, lng: -8.09016314935373 },
+                { lat: 6.87480599715973, lng: -8.11401013599824 },
+                { lat: 6.87527930959003, lng: -8.09163302210968 },
+                { lat: 6.87228752416636, lng: -8.10053373651246 },
+                { lat: 6.86711331669837, lng: -8.09759158600945 },
+                { lat: 6.8648438744937, lng: -8.10117320746305 },
+                { lat: 6.88937889697906, lng: -8.1099168651669 },
+                { lat: 6.87139694433961, lng: -8.10658188483768 },
+                { lat: 6.88810092698163, lng: -8.10464780968101 },
+                { lat: 6.88334019320896, lng: -8.10871466412117 },
+                { lat: 6.8699067017129, lng: -8.08977173832662 },
+                { lat: 6.87827856770309, lng: -8.11471233209711 },
+                { lat: 6.86607919618616, lng: -8.11739724215417 },
+                { lat: 6.86769360970745, lng: -8.09431042710212 },
+                { lat: 6.86283423419129, lng: -8.11030378494213 },
+                { lat: 6.86607420629069, lng: -8.09146567613096 },
+                { lat: 6.88742880222277, lng: -8.10205116448403 },
+                { lat: 6.88095103000091, lng: -8.11121875990725 },
+                { lat: 6.86184388056518, lng: -8.11045290558656 },
+                { lat: 6.87024723215098, lng: -8.1085779489734 },
+                { lat: 6.87221391127752, lng: -8.10911803081059 },
+                { lat: 6.88366545445476, lng: -8.11638121650618 },
+                { lat: 6.8637582599284, lng: -8.09871026917976 },
+                { lat: 6.87242046840198, lng: -8.09906995998947 },
+                { lat: 6.86205430305102, lng: -8.10775887520467 },
+                { lat: 6.873900004595, lng: -8.10638101231814 },
+                { lat: 6.86330760642348, lng: -8.09487055038282 },
+                { lat: 6.88663054462913, lng: -8.11264770843049 },
+                { lat: 6.86018469167005, lng: -8.10773333504573 },
+                { lat: 6.87524405456674, lng: -8.1087349751554 },
+                { lat: 6.87729228054338, lng: -8.10796662251331 },
+                { lat: 6.87510976674283, lng: -8.09819669427725 },
+                { lat: 6.87410547640227, lng: -8.11776856127034 },
+                { lat: 6.88958942274966, lng: -8.09446557444995 },
+                { lat: 6.86689997477351, lng: -8.09850156548669 },
+                { lat: 6.866159680257, lng: -8.09656622714168 },
+                { lat: 6.86454789072632, lng: -8.11327543955019 },
+                { lat: 6.87392018279443, lng: -8.08873135684988 },
+                { lat: 6.87614450141018, lng: -8.11269424546447 },
+                { lat: 6.88744729896373, lng: -8.11571400704508 },
+                { lat: 6.88428950884095, lng: -8.11129276039645 },
+                { lat: 6.87959607603717, lng: -8.11769255551375 },
+                { lat: 6.86690578822188, lng: -8.11592541391701 },
+                { lat: 6.87309035344857, lng: -8.09124985863762 },
+                { lat: 6.87978642342582, lng: -8.0909186697088 },
+                { lat: 6.87232005444052, lng: -8.10241419064171 },
+                { lat: 6.86585760336393, lng: -8.11693551033411 },
+                { lat: 6.87218279390273, lng: -8.09369043579204 },
+                { lat: 6.8809558193831, lng: -8.11062438835727 },
+                { lat: 6.88407267936318, lng: -8.11091775250165 },
+                { lat: 6.8897756986719, lng: -8.09052241624173 },
+                { lat: 6.8714174421446, lng: -8.10414696216168 },
+                { lat: 6.86806347158413, lng: -8.09294306074017 },
+                { lat: 6.86260805589015, lng: -8.10127130755111 },
+                { lat: 6.87613625105524, lng: -8.10877344979562 },
+                { lat: 6.86885760291674, lng: -8.10647651236744 },
+                { lat: 6.87749539090167, lng: -8.09443831237124 },
+                { lat: 6.88181041709596, lng: -8.11070613872849 },
+                { lat: 6.88629633477966, lng: -8.10447285530644 },
+                { lat: 6.87357446895992, lng: -8.11066518695614 },
+                { lat: 6.88533473489758, lng: -8.11329179712578 },
+                { lat: 6.86234491102825, lng: -8.09347918417533 },
+                { lat: 6.88840809095364, lng: -8.10780099464692 },
+                { lat: 6.8727111120469, lng: -8.10360787656778 },
+                { lat: 6.88698325405712, lng: -8.11003829175748 },
+                { lat: 6.88691665420178, lng: -8.08836560471842 },
+                { lat: 6.86121827656636, lng: -8.09411684788192 },
+                { lat: 6.8707745386047, lng: -8.09033240379651 },
+                { lat: 6.88548563184074, lng: -8.10057609209749 },
+                { lat: 6.87017739121324, lng: -8.09550637224492 },
+                { lat: 6.87493537609477, lng: -8.0901857399386 },
+                { lat: 6.88951174610773, lng: -8.09968891781515 },
+                { lat: 6.87221441073066, lng: -8.10902027586997 },
+                { lat: 6.88928716764668, lng: -8.10089919633485 },
+                { lat: 6.88159165227128, lng: -8.08878476443153 },
+                { lat: 6.86869974422137, lng: -8.090676041742 },
+                { lat: 6.87029748225653, lng: -8.10355899048926 },
+                { lat: 6.8616341874527, lng: -8.09081991810477 },
+                { lat: 6.88114152934401, lng: -8.1147936608328 },
+                { lat: 6.87261296813312, lng: -8.08812200950474 },
+                { lat: 6.86968656005139, lng: -8.09865213856065 },
+                { lat: 6.88150306961318, lng: -8.09871703842917 },
+                { lat: 6.87124348845507, lng: -8.10183407434248 },
+                { lat: 6.86530307599031, lng: -8.09656560154081 },
+                { lat: 6.86299378609941, lng: -8.11085209285483 },
+                { lat: 6.86661369755333, lng: -8.11592520323618 },
+                { lat: 6.87433261656813, lng: -8.09903094244328 },
+                { lat: 6.88086681784194, lng: -8.11511510396347 },
+                { lat: 6.86654307144476, lng: -8.09363967677405 },
+                { lat: 6.86226789620536, lng: -8.11308987998206 },
+                { lat: 6.86899754592405, lng: -8.09187489485588 },
+                { lat: 6.87129522451397, lng: -8.10853992722502 },
+                { lat: 6.87136271384705, lng: -8.09299737726188 },
+                { lat: 6.86550746303252, lng: -8.09677964812814 },
+                { lat: 6.88565992869122, lng: -8.10689107578665 },
+                { lat: 6.88850244124151, lng: -8.11602070189229 },
+                { lat: 6.863311139548, lng: -8.11090467263984 },
+                { lat: 6.87962659341808, lng: -8.09312825349131 },
+                { lat: 6.88470000294104, lng: -8.11082943472329 },
+                { lat: 6.87847355801408, lng: -8.10473410906651 },
+                { lat: 6.87068356199094, lng: -8.08841151540786 },
+                { lat: 6.86281381775797, lng: -8.11604993357468 },
+                { lat: 6.88245678259358, lng: -8.1021539330211 },
+                { lat: 6.86718184075702, lng: -8.09878737168379 },
+                { lat: 6.86534281894806, lng: -8.11291072731273 },
+                { lat: 6.87115324784946, lng: -8.09014488111733 },
+                { lat: 6.87893059108776, lng: -8.11168469376624 },
+                { lat: 6.88716873255456, lng: -8.09908699097429 },
+                { lat: 6.86372644007251, lng: -8.10947385861637 },
+                { lat: 6.86846614915777, lng: -8.11378032632509 },
+                { lat: 6.86000243249887, lng: -8.10522672550854 },
+                { lat: 6.86709740782649, lng: -8.11633302674483 },
+                { lat: 6.87501872342663, lng: -8.09874410209949 },
+                { lat: 6.87819395831336, lng: -8.11579698262874 },
+                { lat: 6.87105851018192, lng: -8.11643290189052 },
+                { lat: 6.88929525642324, lng: -8.10768129938879 },
+                { lat: 6.86381311510032, lng: -8.11503284914363 },
+                { lat: 6.88169971559616, lng: -8.09338127811396 },
+                { lat: 6.86368740094522, lng: -8.11723140730572 },
+                { lat: 6.8872192915355, lng: -8.11119215530177 },
+                { lat: 6.87448632800629, lng: -8.11629909530776 },
+                { lat: 6.86344833080784, lng: -8.09397455979578 },
+                { lat: 6.86334973774077, lng: -8.11073175691515 },
+                { lat: 6.87831549822669, lng: -8.11028843802163 },
+                { lat: 6.88909185732424, lng: -8.10244257838441 },
+                { lat: 6.88770418758476, lng: -8.11791261881995 },
+                { lat: 6.87528908200499, lng: -8.09764129217417 },
+                { lat: 6.87723050526831, lng: -8.10329513453571 },
+                { lat: 6.86657549110931, lng: -8.10860071267256 },
+                { lat: 6.87350021911458, lng: -8.11594254774057 },
+                { lat: 6.86793505747775, lng: -8.08886911502973 },
+                { lat: 6.88497843685035, lng: -8.10659273513351 },
+                { lat: 6.87715237579622, lng: -8.09062584960997 },
+                { lat: 6.87869640088495, lng: -8.10144745547257 },
+                { lat: 6.86505193981447, lng: -8.09558936671544 },
+                { lat: 6.86406552591717, lng: -8.0957349891465 },
+                { lat: 6.86716751834005, lng: -8.10095266195315 },
+                { lat: 6.86244253211338, lng: -8.09934298594513 },
+                { lat: 6.86585808568449, lng: -8.11523553713962 },
+                { lat: 6.86602259949571, lng: -8.08918919852424 },
+                { lat: 6.88484092418431, lng: -8.09304567468141 },
+                { lat: 6.87218991815465, lng: -8.09427569101615 },
+                { lat: 6.88301207003107, lng: -8.10162741477084 },
+                { lat: 6.87231220087459, lng: -8.10875942230773 },
+                { lat: 6.88199703700623, lng: -8.1122644862126 },
+                { lat: 6.88342231161338, lng: -8.09522967851953 },
+                { lat: 6.86506300177903, lng: -8.11349634245373 },
+                { lat: 6.86449298952096, lng: -8.10538780417052 },
+                { lat: 6.86252851528283, lng: -8.1067405220056 },
+                { lat: 6.88152063450528, lng: -8.11799641662534 },
+                { lat: 6.88124868801973, lng: -8.0923957737822 },
+                { lat: 6.87497482184184, lng: -8.0986760605637 },
+                { lat: 6.86761014737027, lng: -8.09811477670332 },
+                { lat: 6.87909729618085, lng: -8.10847082837803 },
+                { lat: 6.88481928067522, lng: -8.11530682714244 },
+                { lat: 6.87870352317199, lng: -8.11246329212374 },
+                { lat: 6.87545274540888, lng: -8.09319129884974 },
+                { lat: 6.86114909448235, lng: -8.11785258934656 },
+                { lat: 6.87222592404203, lng: -8.10718146964884 },
+                { lat: 6.86852849930573, lng: -8.09698051578607 },
+                { lat: 6.87169966470783, lng: -8.10961447135135 },
+                { lat: 6.88526548163689, lng: -8.10878619356877 },
+                { lat: 6.88079241597172, lng: -8.10625865601687 },
+                { lat: 6.88289651212439, lng: -8.11287596624882 },
+                { lat: 6.87066955372619, lng: -8.11741139246376 },
+                { lat: 6.88856619988052, lng: -8.11631891967044 },
+                { lat: 6.86770371010914, lng: -8.10473628912557 },
+                { lat: 6.86935372165123, lng: -8.10170269487132 },
+                { lat: 6.88730580667298, lng: -8.11004025048194 },
+                { lat: 6.88550958230388, lng: -8.09855319657745 },
+                { lat: 6.86828761443078, lng: -8.08971096593795 },
+                { lat: 6.87246248568816, lng: -8.11351826518367 },
+                { lat: 6.87677220207281, lng: -8.11303385513078 },
+                { lat: 6.88498421256094, lng: -8.11795523885684 },
+                { lat: 6.88052078779418, lng: -8.09656061996107 },
+                { lat: 6.86315956304469, lng: -8.10751108188585 },
+                { lat: 6.86134477750639, lng: -8.10579842598382 },
+                { lat: 6.87250310592588, lng: -8.10504909124398 },
+                { lat: 6.8772177516889, lng: -8.11196997590599 },
+                { lat: 6.86198212187798, lng: -8.11419636953613 },
+                { lat: 6.88493915312756, lng: -8.09978847829818 },
+                { lat: 6.8827336679305, lng: -8.09664016753721 },
+                { lat: 6.88174944482611, lng: -8.10500110486023 },
+                { lat: 6.8715205328486, lng: -8.1079444612863 },
+                { lat: 6.87301758022469, lng: -8.10629836107927 },
+                { lat: 6.86636191329487, lng: -8.11565463561423 },
             ],
-
             tsp500: [
-
+                { lat: 44.5310866910941, lng: -78.5398644241905 },
+                { lat: 44.5504918727345, lng: -78.5492588378783 },
+                { lat: 44.5540483581115, lng: -78.55230717239 },
+                { lat: 44.5322039707664, lng: -78.5338783478536 },
+                { lat: 44.5332857728643, lng: -78.5425908669018 },
+                { lat: 44.5478742515156, lng: -78.5354045061465 },
+                { lat: 44.5532873362438, lng: -78.5416579682233 },
+                { lat: 44.5426148145949, lng: -78.5302326998365 },
+                { lat: 44.5408634079707, lng: -78.5480841853784 },
+                { lat: 44.5413438853891, lng: -78.5405794164608 },
+                { lat: 44.5446157087853, lng: -78.5423042939866 },
+                { lat: 44.5346042416904, lng: -78.5503119362184 },
+                { lat: 44.5592022067977, lng: -78.5309894140044 },
+                { lat: 44.5324079985706, lng: -78.5413866662049 },
+                { lat: 44.542878119227, lng: -78.5512600337594 },
+                { lat: 44.558646470016, lng: -78.5416275506896 },
+                { lat: 44.5332618399403, lng: -78.533417679713 },
+                { lat: 44.5490395717577, lng: -78.5493821545185 },
+                { lat: 44.5581987624004, lng: -78.5248344523343 },
+                { lat: 44.545644519219, lng: -78.5345404416404 },
+                { lat: 44.5596578034848, lng: -78.5415134828869 },
+                { lat: 44.5423309088181, lng: -78.5442187261987 },
+                { lat: 44.5335277529313, lng: -78.5486623847106 },
+                { lat: 44.5351535290138, lng: -78.5459862557723 },
+                { lat: 44.531412370595, lng: -78.5346348480393 },
+                { lat: 44.5568947006149, lng: -78.5405707830029 },
+                { lat: 44.5456568662714, lng: -78.5520211058472 },
+                { lat: 44.5494172915498, lng: -78.5472480338675 },
+                { lat: 44.5454894500449, lng: -78.5398610075857 },
+                { lat: 44.5426714945235, lng: -78.5458844817494 },
+                { lat: 44.5468590307672, lng: -78.5379584793369 },
+                { lat: 44.559081007214, lng: -78.5499968445352 },
+                { lat: 44.5446060647929, lng: -78.5255192364848 },
+                { lat: 44.5531107330822, lng: -78.5532945030982 },
+                { lat: 44.5321696563631, lng: -78.54898904254 },
+                { lat: 44.5569848534563, lng: -78.5535338147893 },
+                { lat: 44.5314750718384, lng: -78.5345399058999 },
+                { lat: 44.550053267764, lng: -78.54794196917 },
+                { lat: 44.5533369528813, lng: -78.5286660739591 },
+                { lat: 44.5427713722989, lng: -78.5383488374425 },
+                { lat: 44.5586451238432, lng: -78.5485650098888 },
+                { lat: 44.5418677906645, lng: -78.5353293581932 },
+                { lat: 44.5527086089686, lng: -78.5358543810618 },
+                { lat: 44.5580225315993, lng: -78.5374419834651 },
+                { lat: 44.5426527599013, lng: -78.54889951196 },
+                { lat: 44.5457126658741, lng: -78.551048694825 },
+                { lat: 44.5422844172745, lng: -78.5390352548379 },
+                { lat: 44.536302473184, lng: -78.55303759004 },
+                { lat: 44.5359749569704, lng: -78.5436327957837 },
+                { lat: 44.5488913632459, lng: -78.543600397416 },
+                { lat: 44.5425306034735, lng: -78.5243061194929 },
+                { lat: 44.5350667600223, lng: -78.5325294982863 },
+                { lat: 44.5495325730479, lng: -78.5323668947043 },
+                { lat: 44.5564226014097, lng: -78.5335596761712 },
+                { lat: 44.5388100777311, lng: -78.5396963134646 },
+                { lat: 44.533138453537, lng: -78.5268061966146 },
+                { lat: 44.5551990576615, lng: -78.5273192270688 },
+                { lat: 44.5451699245055, lng: -78.5465966537082 },
+                { lat: 44.5433878144489, lng: -78.5371924100717 },
+                { lat: 44.5530666516752, lng: -78.5390930432221 },
+                { lat: 44.5393159913785, lng: -78.5452704950428 },
+                { lat: 44.5322116391768, lng: -78.5264616930798 },
+                { lat: 44.5472605137937, lng: -78.5400504707821 },
+                { lat: 44.5515566576902, lng: -78.5387090472581 },
+                { lat: 44.5516697045181, lng: -78.5533730739633 },
+                { lat: 44.5454230853961, lng: -78.5508794978709 },
+                { lat: 44.5549936652746, lng: -78.5293604908004 },
+                { lat: 44.5507879199881, lng: -78.5240327246415 },
+                { lat: 44.5504659022476, lng: -78.5477333175143 },
+                { lat: 44.5383066830088, lng: -78.5317488299395 },
+                { lat: 44.5412458384154, lng: -78.5459081627817 },
+                { lat: 44.5429191476753, lng: -78.5485009456181 },
+                { lat: 44.5337924054157, lng: -78.5359867252665 },
+                { lat: 44.5479541890272, lng: -78.5475321667809 },
+                { lat: 44.5557153088704, lng: -78.5295838042954 },
+                { lat: 44.557864579081, lng: -78.5388104763053 },
+                { lat: 44.5584517347919, lng: -78.5335782868066 },
+                { lat: 44.5536553548557, lng: -78.5315123207118 },
+                { lat: 44.5413748701026, lng: -78.5520884434194 },
+                { lat: 44.5336399949404, lng: -78.5323382522783 },
+                { lat: 44.5485012707703, lng: -78.5502276045139 },
+                { lat: 44.5408049353398, lng: -78.5295903009161 },
+                { lat: 44.5449045990516, lng: -78.5316420673534 },
+                { lat: 44.5416078234388, lng: -78.5414457893087 },
+                { lat: 44.5553558799723, lng: -78.5273228228292 },
+                { lat: 44.553869264283, lng: -78.5498580718171 },
+                { lat: 44.5302126275552, lng: -78.5437955555395 },
+                { lat: 44.5374534671581, lng: -78.5470641817623 },
+                { lat: 44.5437176233889, lng: -78.5503461576653 },
+                { lat: 44.5582364460061, lng: -78.5362324451267 },
+                { lat: 44.5348749736103, lng: -78.5271175874662 },
+                { lat: 44.5571657962786, lng: -78.5262918584218 },
+                { lat: 44.5487891803798, lng: -78.531903626561 },
+                { lat: 44.5482403831166, lng: -78.5263952347814 },
+                { lat: 44.542223839064, lng: -78.5261977147955 },
+                { lat: 44.5501281267954, lng: -78.5333876352132 },
+                { lat: 44.531821066455, lng: -78.5263448825512 },
+                { lat: 44.5552398380778, lng: -78.5531468849819 },
+                { lat: 44.5465068092368, lng: -78.5428743620432 },
+                { lat: 44.5481457102911, lng: -78.5372289827575 },
+                { lat: 44.5348282989549, lng: -78.5537608196147 },
+                { lat: 44.5330733333776, lng: -78.5375983016057 },
+                { lat: 44.5499005269352, lng: -78.5467222187104 },
+                { lat: 44.5322312923757, lng: -78.5409638587727 },
+                { lat: 44.5475128900194, lng: -78.5383964224998 },
+                { lat: 44.5327479340876, lng: -78.5273034641409 },
+                { lat: 44.5593862644759, lng: -78.5374435476584 },
+                { lat: 44.5460136819057, lng: -78.5469445020398 },
+                { lat: 44.5432272596679, lng: -78.5494287202121 },
+                { lat: 44.5309425760388, lng: -78.5341899997273 },
+                { lat: 44.5423619646114, lng: -78.5242805439469 },
+                { lat: 44.5441811930285, lng: -78.5422014241182 },
+                { lat: 44.5367096252095, lng: -78.5491204412699 },
+                { lat: 44.5415563567355, lng: -78.5336109989123 },
+                { lat: 44.545740569853, lng: -78.5534077782466 },
+                { lat: 44.5313664087888, lng: -78.5503757916541 },
+                { lat: 44.5390114048099, lng: -78.5256921460384 },
+                { lat: 44.5392792308979, lng: -78.5327679157344 },
+                { lat: 44.5512604308538, lng: -78.5502816925368 },
+                { lat: 44.5476756832858, lng: -78.5444725400751 },
+                { lat: 44.5481165209508, lng: -78.5518851716157 },
+                { lat: 44.5308226142008, lng: -78.5301143068211 },
+                { lat: 44.5570303555346, lng: -78.5434680792388 },
+                { lat: 44.5495486229087, lng: -78.5258020149318 },
+                { lat: 44.5360237605648, lng: -78.5392264583193 },
+                { lat: 44.5576825453106, lng: -78.529260636926 },
+                { lat: 44.5310029719925, lng: -78.543172871403 },
+                { lat: 44.5421919212958, lng: -78.5515393658019 },
+                { lat: 44.5592555424267, lng: -78.5389818051873 },
+                { lat: 44.550871900113, lng: -78.5523844418833 },
+                { lat: 44.5424504168564, lng: -78.5529787957087 },
+                { lat: 44.5470080015511, lng: -78.5412858539329 },
+                { lat: 44.539638996449, lng: -78.553602234655 },
+                { lat: 44.5503283871256, lng: -78.5375327398165 },
+                { lat: 44.5318198567188, lng: -78.5281578624493 },
+                { lat: 44.5331758172358, lng: -78.5427971187672 },
+                { lat: 44.5562204479725, lng: -78.5402969339529 },
+                { lat: 44.5363201916377, lng: -78.5404710549421 },
+                { lat: 44.5475802131072, lng: -78.5426156586921 },
+                { lat: 44.5516524123498, lng: -78.5325960564196 },
+                { lat: 44.5517073741963, lng: -78.5330960834182 },
+                { lat: 44.557495993328, lng: -78.5407684941707 },
+                { lat: 44.5326099238466, lng: -78.5442860823634 },
+                { lat: 44.5564809657518, lng: -78.5446787335341 },
+                { lat: 44.5391592178515, lng: -78.5291844531069 },
+                { lat: 44.5579385095808, lng: -78.5516490824082 },
+                { lat: 44.5556300599712, lng: -78.5342725620738 },
+                { lat: 44.5437261120237, lng: -78.526866887242 },
+                { lat: 44.5423553705234, lng: -78.540768055075 },
+                { lat: 44.54969450503, lng: -78.5476438086716 },
+                { lat: 44.54014289439, lng: -78.5479577400048 },
+                { lat: 44.5412907491034, lng: -78.5245260791227 },
+                { lat: 44.5506369987512, lng: -78.5294166726727 },
+                { lat: 44.5327804617705, lng: -78.5434064164784 },
+                { lat: 44.539075840961, lng: -78.5515009749485 },
+                { lat: 44.5535685657849, lng: -78.5260807459212 },
+                { lat: 44.5427467130698, lng: -78.5303566267481 },
+                { lat: 44.553588527842, lng: -78.5492710431101 },
+                { lat: 44.5433247445184, lng: -78.5345078937321 },
+                { lat: 44.5434107045443, lng: -78.5525009745552 },
+                { lat: 44.5529525272047, lng: -78.5252446692007 },
+                { lat: 44.5567317922753, lng: -78.5324298229497 },
+                { lat: 44.5489083892565, lng: -78.5242574282065 },
+                { lat: 44.5333108706333, lng: -78.5521957282902 },
+                { lat: 44.5413919580517, lng: -78.5406838401841 },
+                { lat: 44.5521508895104, lng: -78.5379217894306 },
+                { lat: 44.5404886337912, lng: -78.5281202734327 },
+                { lat: 44.5348954916997, lng: -78.5336201202965 },
+                { lat: 44.5336231624402, lng: -78.5342658434418 },
+                { lat: 44.5574572028192, lng: -78.5478960593522 },
+                { lat: 44.5402866099125, lng: -78.5340384217804 },
+                { lat: 44.556460360919, lng: -78.5401040356245 },
+                { lat: 44.5526787968373, lng: -78.5347795353968 },
+                { lat: 44.5337279560492, lng: -78.5494299141199 },
+                { lat: 44.5339052434259, lng: -78.5494907233603 },
+                { lat: 44.5512264749638, lng: -78.5278861906991 },
+                { lat: 44.5523346717669, lng: -78.5299434329122 },
+                { lat: 44.5352564659526, lng: -78.5349293426179 },
+                { lat: 44.5537000893795, lng: -78.5296920456309 },
+                { lat: 44.5472701560708, lng: -78.5382345373136 },
+                { lat: 44.5323817410914, lng: -78.5500334822727 },
+                { lat: 44.53545837822, lng: -78.5315364897524 },
+                { lat: 44.547656925013, lng: -78.5417845001396 },
+                { lat: 44.5583141356634, lng: -78.5272982285735 },
+                { lat: 44.5542235045819, lng: -78.5496042132319 },
+                { lat: 44.5359231325492, lng: -78.5255305652854 },
+                { lat: 44.5590940758863, lng: -78.5498736568266 },
+                { lat: 44.544059773761, lng: -78.5261296677031 },
+                { lat: 44.5543619372262, lng: -78.5436944469691 },
+                { lat: 44.5524993927744, lng: -78.5416205163018 },
+                { lat: 44.5591300958864, lng: -78.5356909728719 },
+                { lat: 44.556144899407, lng: -78.5314426114493 },
+                { lat: 44.5589289962528, lng: -78.5421095485446 },
+                { lat: 44.5315983128173, lng: -78.5458748586365 },
+                { lat: 44.5370094830246, lng: -78.5534334583855 },
+                { lat: 44.5304691551438, lng: -78.5267011313222 },
+                { lat: 44.5471952469413, lng: -78.5424818752212 },
+                { lat: 44.5380505171451, lng: -78.5303670386071 },
+                { lat: 44.5486770570863, lng: -78.5278126328951 },
+                { lat: 44.5555325972768, lng: -78.5340411401515 },
+                { lat: 44.5517926901779, lng: -78.5335262023283 },
+                { lat: 44.5382867575939, lng: -78.5281342917945 },
+                { lat: 44.5565830643891, lng: -78.536089578977 },
+                { lat: 44.5368084348235, lng: -78.5383089084876 },
+                { lat: 44.5433431882449, lng: -78.5356588564215 },
+                { lat: 44.5433171447651, lng: -78.5309601097933 },
+                { lat: 44.5410114550324, lng: -78.5369544541156 },
+                { lat: 44.5381721779869, lng: -78.5280509722541 },
+                { lat: 44.5365885987283, lng: -78.5240340994314 },
+                { lat: 44.5319887179057, lng: -78.5473310384245 },
+                { lat: 44.5459521940184, lng: -78.5530464112162 },
+                { lat: 44.558473317, lng: -78.531383687836 },
+                { lat: 44.5501938104485, lng: -78.550796972273 },
+                { lat: 44.540250626618, lng: -78.52562369571 },
+                { lat: 44.5493728700196, lng: -78.5249904980584 },
+                { lat: 44.5564530781306, lng: -78.5244387630619 },
+                { lat: 44.5501178649102, lng: -78.5364323255786 },
+                { lat: 44.5426779594109, lng: -78.5386394127031 },
+                { lat: 44.5309783446308, lng: -78.527835657661 },
+                { lat: 44.5516385834836, lng: -78.5377396267385 },
+                { lat: 44.54241184137, lng: -78.527200515385 },
+                { lat: 44.5307223926099, lng: -78.5299927694901 },
+                { lat: 44.5384307144016, lng: -78.54825404756 },
+                { lat: 44.5504849168382, lng: -78.5522768001814 },
+                { lat: 44.5435114021459, lng: -78.5515353022775 },
+                { lat: 44.5380213184564, lng: -78.5431738996107 },
+                { lat: 44.5589219521608, lng: -78.53903648219 },
+                { lat: 44.5582588044874, lng: -78.5284892907853 },
+                { lat: 44.5384986847508, lng: -78.5443036433264 },
+                { lat: 44.5407071472182, lng: -78.5517000283011 },
+                { lat: 44.5446968316495, lng: -78.5532956789139 },
+                { lat: 44.5529008250239, lng: -78.5343557643502 },
+                { lat: 44.5480183364797, lng: -78.533956654519 },
+                { lat: 44.5422824873432, lng: -78.5310677277254 },
+                { lat: 44.5349271700613, lng: -78.5385285304568 },
+                { lat: 44.5436286004945, lng: -78.5463375306647 },
+                { lat: 44.5591843825245, lng: -78.5385855942888 },
+                { lat: 44.5460573017642, lng: -78.5357899299281 },
+                { lat: 44.5473722730155, lng: -78.5425700114886 },
+                { lat: 44.5358949225452, lng: -78.5349649993043 },
+                { lat: 44.53736307046, lng: -78.5477149488303 },
+                { lat: 44.5425342682504, lng: -78.5292526500636 },
+                { lat: 44.5459616480826, lng: -78.5520004228616 },
+                { lat: 44.5574157543684, lng: -78.540136081531 },
+                { lat: 44.5397433311369, lng: -78.549278539514 },
+                { lat: 44.5373247278172, lng: -78.5525386392231 },
+                { lat: 44.5584003478328, lng: -78.5393615562146 },
+                { lat: 44.5366977433698, lng: -78.5475332029501 },
+                { lat: 44.5302699091201, lng: -78.5382509994736 },
+                { lat: 44.5340328038945, lng: -78.5358783011504 },
+                { lat: 44.5312270453488, lng: -78.5475807704778 },
+                { lat: 44.5442024374378, lng: -78.530606758081 },
+                { lat: 44.5368295464127, lng: -78.5511774294192 },
+                { lat: 44.5428236209842, lng: -78.5242952378015 },
+                { lat: 44.5406841356505, lng: -78.5421235762243 },
+                { lat: 44.5571185954809, lng: -78.5389901508479 },
+                { lat: 44.5424628448462, lng: -78.5252051597318 },
+                { lat: 44.5546756447054, lng: -78.5521592743607 },
+                { lat: 44.553606311633, lng: -78.5299542070137 },
+                { lat: 44.5536197609342, lng: -78.5521223533936 },
+                { lat: 44.530757251445, lng: -78.5299695429537 },
+                { lat: 44.5588275752923, lng: -78.5291867541059 },
+                { lat: 44.5312920897682, lng: -78.5309035190942 },
+                { lat: 44.5565789433491, lng: -78.5266137882549 },
+                { lat: 44.5542459135873, lng: -78.5402353455604 },
+                { lat: 44.5320742443761, lng: -78.5445176179537 },
+                { lat: 44.5387125664152, lng: -78.5282776341981 },
+                { lat: 44.5325309129741, lng: -78.5378890888068 },
+                { lat: 44.5478492538002, lng: -78.5320839753118 },
+                { lat: 44.5334629116168, lng: -78.5391353840133 },
+                { lat: 44.5512903912851, lng: -78.5246493583539 },
+                { lat: 44.5410735934086, lng: -78.5494350535648 },
+                { lat: 44.5503771670812, lng: -78.5503970042955 },
+                { lat: 44.5459824297537, lng: -78.5301087691533 },
+                { lat: 44.5506337151903, lng: -78.5395129737252 },
+                { lat: 44.5449134780662, lng: -78.5451676418879 },
+                { lat: 44.5465087847288, lng: -78.5389082120543 },
+                { lat: 44.5499578216581, lng: -78.5239534576412 },
+                { lat: 44.5569084528457, lng: -78.5315302243419 },
+                { lat: 44.5489582504343, lng: -78.5298905642727 },
+                { lat: 44.5592295324559, lng: -78.5465685892719 },
+                { lat: 44.5519506066799, lng: -78.552310796375 },
+                { lat: 44.552967049535, lng: -78.5285385118043 },
+                { lat: 44.5406414257856, lng: -78.5320341449 },
+                { lat: 44.5588013749562, lng: -78.5499452672203 },
+                { lat: 44.5474432074865, lng: -78.552405230867 },
+                { lat: 44.5334996231849, lng: -78.5361416429681 },
+                { lat: 44.5432391510515, lng: -78.5500620097973 },
+                { lat: 44.5312546348544, lng: -78.5261582813466 },
+                { lat: 44.5358560271796, lng: -78.5328422293853 },
+                { lat: 44.5530657469282, lng: -78.5246357029837 },
+                { lat: 44.537789254897, lng: -78.5428765790558 },
+                { lat: 44.5466010879372, lng: -78.5471736459118 },
+                { lat: 44.5461302552051, lng: -78.5419876994732 },
+                { lat: 44.5583020651811, lng: -78.5491634776849 },
+                { lat: 44.541502030047, lng: -78.5419030613634 },
+                { lat: 44.5573231730473, lng: -78.5391265250789 },
+                { lat: 44.5393971010216, lng: -78.5289493876006 },
+                { lat: 44.5355609122594, lng: -78.5371790965963 },
+                { lat: 44.5404868829599, lng: -78.5529643172161 },
+                { lat: 44.5318770614472, lng: -78.54135287519 },
+                { lat: 44.5513015599404, lng: -78.5486966827722 },
+                { lat: 44.5317535375459, lng: -78.5338697188875 },
+                { lat: 44.5415206879312, lng: -78.5393785822852 },
+                { lat: 44.555520889103, lng: -78.5256160761733 },
+                { lat: 44.558498599164, lng: -78.5302622184249 },
+                { lat: 44.5531770147362, lng: -78.5521528018489 },
+                { lat: 44.5361489606725, lng: -78.5249302443739 },
+                { lat: 44.5400339709748, lng: -78.5489179306646 },
+                { lat: 44.5373854314798, lng: -78.5386279861545 },
+                { lat: 44.5551323788438, lng: -78.5515997759212 },
+                { lat: 44.553268649821, lng: -78.5451313236623 },
+                { lat: 44.5377264566139, lng: -78.5285713680385 },
+                { lat: 44.5601101045234, lng: -78.5245237785838 },
+                { lat: 44.5402145005559, lng: -78.533850083427 },
+                { lat: 44.5561833173993, lng: -78.5412419936745 },
+                { lat: 44.5429301318539, lng: -78.5519117640597 },
+                { lat: 44.5458409441472, lng: -78.5305250050398 },
+                { lat: 44.5576581229349, lng: -78.5434427771096 },
+                { lat: 44.5450732738606, lng: -78.5529923507454 },
+                { lat: 44.5560415412228, lng: -78.5245461615685 },
+                { lat: 44.541472892749, lng: -78.5434579716098 },
+                { lat: 44.5560230384456, lng: -78.5508004656486 },
+                { lat: 44.5513123732757, lng: -78.5524493875728 },
+                { lat: 44.5392908216013, lng: -78.5520469787159 },
+                { lat: 44.5514207399582, lng: -78.5434988845276 },
+                { lat: 44.5587681388345, lng: -78.5440460147026 },
+                { lat: 44.5523263936963, lng: -78.5463686909008 },
+                { lat: 44.5452920336916, lng: -78.538693308061 },
+                { lat: 44.549056339332, lng: -78.533036381478 },
+                { lat: 44.5319701689617, lng: -78.5302395710342 },
+                { lat: 44.5325381417952, lng: -78.5519660350632 },
+                { lat: 44.5480827510203, lng: -78.5523275441601 },
+                { lat: 44.5549053132459, lng: -78.5266922109944 },
+                { lat: 44.5408548942638, lng: -78.5491723791465 },
+                { lat: 44.5472437105531, lng: -78.5490996413364 },
+                { lat: 44.5518051113865, lng: -78.5383995173868 },
+                { lat: 44.5406895307907, lng: -78.5449241929258 },
+                { lat: 44.5416692489728, lng: -78.5399461889996 },
+                { lat: 44.5444936757841, lng: -78.5366177740973 },
+                { lat: 44.5569515303769, lng: -78.5331369492993 },
+                { lat: 44.5376627116337, lng: -78.5316902071501 },
+                { lat: 44.53092674459, lng: -78.5346941278396 },
+                { lat: 44.5514521793769, lng: -78.5375017443611 },
+                { lat: 44.5374291434233, lng: -78.5286998402827 },
+                { lat: 44.546565678475, lng: -78.5309346094761 },
+                { lat: 44.5387201299319, lng: -78.528814202578 },
+                { lat: 44.535734644224, lng: -78.5500491208622 },
+                { lat: 44.5363096187835, lng: -78.5390498803551 },
+                { lat: 44.5551253199737, lng: -78.5516498600834 },
+                { lat: 44.5572491878872, lng: -78.5367819904112 },
+                { lat: 44.5499973091366, lng: -78.54062166957 },
+                { lat: 44.5594012421865, lng: -78.5511870470684 },
+                { lat: 44.5514132955396, lng: -78.5387823149064 },
+                { lat: 44.5420531512627, lng: -78.5353112777254 },
+                { lat: 44.5379270355029, lng: -78.5263685256143 },
+                { lat: 44.5559742384952, lng: -78.5318560593932 },
+                { lat: 44.5451843648479, lng: -78.5478611740699 },
+                { lat: 44.560194729279, lng: -78.5334448110587 },
+                { lat: 44.5330287230248, lng: -78.5263991809389 },
+                { lat: 44.542668161335, lng: -78.5314449708198 },
+                { lat: 44.5400316783567, lng: -78.5368732352886 },
+                { lat: 44.5361277281942, lng: -78.5354390339726 },
+                { lat: 44.5429193239831, lng: -78.545856721391 },
+                { lat: 44.543292728661, lng: -78.5416535584065 },
+                { lat: 44.5436919850356, lng: -78.5422481819443 },
+                { lat: 44.5451597290888, lng: -78.5268496754044 },
+                { lat: 44.5365042593289, lng: -78.5312148236068 },
+                { lat: 44.5500779524583, lng: -78.5456630606356 },
+                { lat: 44.5403524319308, lng: -78.5537417100818 },
+                { lat: 44.5492581212941, lng: -78.5387778874761 },
+                { lat: 44.5596495100281, lng: -78.5526781663961 },
+                { lat: 44.5504401186189, lng: -78.5438373962309 },
+                { lat: 44.5347889444406, lng: -78.538752943592 },
+                { lat: 44.5398491573599, lng: -78.5433457666805 },
+                { lat: 44.552431456199, lng: -78.5385358618968 },
+                { lat: 44.5307217620013, lng: -78.5494398954255 },
+                { lat: 44.5511981902874, lng: -78.5485975813417 },
+                { lat: 44.5526425940435, lng: -78.5484910653946 },
+                { lat: 44.5567684584957, lng: -78.5465394571777 },
+                { lat: 44.5434471394927, lng: -78.5290948108278 },
+                { lat: 44.5552468234965, lng: -78.5501408906871 },
+                { lat: 44.5545048556914, lng: -78.5469381590298 },
+                { lat: 44.54292758101, lng: -78.5281997829326 },
+                { lat: 44.5368581710291, lng: -78.5394887784985 },
+                { lat: 44.5511975478941, lng: -78.5423018790651 },
+                { lat: 44.5382022153297, lng: -78.538721698714 },
+                { lat: 44.5417916299329, lng: -78.5309442528946 },
+                { lat: 44.5476465330026, lng: -78.5309250109156 },
+                { lat: 44.5360983435117, lng: -78.5368882307033 },
+                { lat: 44.5406452114681, lng: -78.5402738856236 },
+                { lat: 44.5431876325052, lng: -78.5442221382573 },
+                { lat: 44.5486207485821, lng: -78.545686795123 },
+                { lat: 44.5344274331935, lng: -78.5333835944136 },
+                { lat: 44.5577066627803, lng: -78.541571229216 },
+                { lat: 44.5389746064192, lng: -78.5394595397447 },
+                { lat: 44.5448902559955, lng: -78.5510899781153 },
+                { lat: 44.5357123732284, lng: -78.5428828321859 },
+                { lat: 44.5528435721694, lng: -78.5413993468785 },
+                { lat: 44.5364615834034, lng: -78.5409611267303 },
+                { lat: 44.5330141209905, lng: -78.5389914167055 },
+                { lat: 44.5372729077707, lng: -78.5333208231246 },
+                { lat: 44.5524230607791, lng: -78.5290545234644 },
+                { lat: 44.5587808274839, lng: -78.5291669502851 },
+                { lat: 44.5437140216127, lng: -78.5329344950922 },
+                { lat: 44.5444569770308, lng: -78.5399656604499 },
+                { lat: 44.5375649246468, lng: -78.5279936532645 },
+                { lat: 44.5451343810518, lng: -78.552681491555 },
+                { lat: 44.5376095104567, lng: -78.5491135189223 },
+                { lat: 44.5303768329885, lng: -78.5249669188237 },
+                { lat: 44.5315024913773, lng: -78.5349163532753 },
+                { lat: 44.5594523622255, lng: -78.5464852785006 },
+                { lat: 44.5417692781524, lng: -78.5467325460735 },
+                { lat: 44.5578619638262, lng: -78.5446143296567 },
+                { lat: 44.5416998164922, lng: -78.5326032261027 },
+                { lat: 44.5468279376274, lng: -78.5486569713059 },
+                { lat: 44.5573206245693, lng: -78.5242415624596 },
+                { lat: 44.5580035854068, lng: -78.5322466530139 },
+                { lat: 44.5333594967019, lng: -78.5377359457086 },
+                { lat: 44.5393862506813, lng: -78.5457080347439 },
+                { lat: 44.5327368873514, lng: -78.5294066662852 },
+                { lat: 44.56012894733, lng: -78.5259503819349 },
+                { lat: 44.5487468480725, lng: -78.5412326416752 },
+                { lat: 44.5366081434107, lng: -78.5256220651921 },
+                { lat: 44.5443205385274, lng: -78.5402654303912 },
+                { lat: 44.5315820494328, lng: -78.5402814554972 },
+                { lat: 44.5326969127779, lng: -78.5289343750541 },
+                { lat: 44.5463613295834, lng: -78.5273996649797 },
+                { lat: 44.536783121995, lng: -78.5489767447793 },
+                { lat: 44.5480247971769, lng: -78.5421335001075 },
+                { lat: 44.5536619052561, lng: -78.5502659833645 },
+                { lat: 44.5574910663462, lng: -78.5469214579158 },
+                { lat: 44.5391382277313, lng: -78.5434190494696 },
+                { lat: 44.5335360566017, lng: -78.5423956223257 },
+                { lat: 44.5332533315845, lng: -78.543526030466 },
+                { lat: 44.5579150679105, lng: -78.5406058642935 },
+                { lat: 44.5424681556631, lng: -78.5335100412461 },
+                { lat: 44.5522805721518, lng: -78.548235635429 },
+                { lat: 44.5454995850708, lng: -78.5297080322015 },
+                { lat: 44.535741280709, lng: -78.5367558047378 },
+                { lat: 44.5329378904775, lng: -78.5532972486228 },
+                { lat: 44.5538313767154, lng: -78.5492957989655 },
+                { lat: 44.5332869792317, lng: -78.5243169413248 },
+                { lat: 44.545963297239, lng: -78.5423703883077 },
+                { lat: 44.5413170937806, lng: -78.5419499207423 },
+                { lat: 44.5302825449205, lng: -78.529208382325 },
+                { lat: 44.5375894569609, lng: -78.5521815162406 },
+                { lat: 44.5483088578767, lng: -78.5342823726165 },
+                { lat: 44.5455118398686, lng: -78.5380046727854 },
+                { lat: 44.5417098037837, lng: -78.5268267012714 },
+                { lat: 44.5322979544451, lng: -78.5531685403555 },
+                { lat: 44.5372231360412, lng: -78.5450828656271 },
+                { lat: 44.545563349744, lng: -78.5240972739241 },
+                { lat: 44.5331152657882, lng: -78.5349347144198 },
+                { lat: 44.558193773574, lng: -78.5286034909821 },
+                { lat: 44.5386772590746, lng: -78.5412884035821 },
+                { lat: 44.5540268276761, lng: -78.5328709231479 },
+                { lat: 44.5590239999558, lng: -78.5378506704578 },
+                { lat: 44.555440122076, lng: -78.5462622413158 },
+                { lat: 44.5429773534591, lng: -78.5517828850639 },
+                { lat: 44.5521242790908, lng: -78.5464031021005 },
+                { lat: 44.5366235211478, lng: -78.5310570284511 },
+                { lat: 44.5572954182425, lng: -78.5391030526713 },
+                { lat: 44.5346482495896, lng: -78.540096350402 },
+                { lat: 44.5356490202421, lng: -78.5521486486444 },
+                { lat: 44.5400307697209, lng: -78.527683543669 },
+                { lat: 44.5500501854373, lng: -78.5252765400287 },
+                { lat: 44.5587548246447, lng: -78.5431527626961 },
+                { lat: 44.5357110795297, lng: -78.5284767688528 },
+                { lat: 44.53608116803, lng: -78.5300997289708 },
+                { lat: 44.5408184529281, lng: -78.5447096365643 },
+                { lat: 44.5431989021194, lng: -78.5489488923479 },
+                { lat: 44.5372288306358, lng: -78.5485800593013 },
+                { lat: 44.5576479066858, lng: -78.5330271407914 },
+                { lat: 44.5399383679529, lng: -78.528023194546 },
+                { lat: 44.5580894605051, lng: -78.5375572370723 },
+                { lat: 44.5363723970921, lng: -78.5369111592382 },
+                { lat: 44.5341088136662, lng: -78.5259629893274 },
+                { lat: 44.5553841584478, lng: -78.5255450639238 },
+                { lat: 44.5578231365183, lng: -78.5445409454307 },
+                { lat: 44.5305480851078, lng: -78.5256940625886 },
+                { lat: 44.5434379836227, lng: -78.5377218592159 },
+                { lat: 44.5376274865576, lng: -78.5428283493103 },
+                { lat: 44.5388335020985, lng: -78.5501866638907 },
+                { lat: 44.5593427362525, lng: -78.5336528613949 },
+                { lat: 44.5576590638032, lng: -78.5519525172415 },
+                { lat: 44.5462895819664, lng: -78.5393710785743 },
+                { lat: 44.5396249307018, lng: -78.5330603460219 },
+                { lat: 44.5534486873472, lng: -78.5303127943068 },
+                { lat: 44.5311913195202, lng: -78.5340313564453 },
+                { lat: 44.5389287983416, lng: -78.5351871665273 },
+                { lat: 44.5315710625244, lng: -78.5530638389521 },
+                { lat: 44.5597212827923, lng: -78.5312344031307 },
+                { lat: 44.5347257882231, lng: -78.5298201639907 },
+                { lat: 44.5438656533108, lng: -78.5448121646115 },
+                { lat: 44.5316294178757, lng: -78.5276710620681 },
+                { lat: 44.5442205024781, lng: -78.5499436324908 },
+                { lat: 44.5492615259037, lng: -78.5350984546049 },
+                { lat: 44.5434400325985, lng: -78.5268983727417 },
+                { lat: 44.5391636451789, lng: -78.5370111446855 },
             ],
 
         };

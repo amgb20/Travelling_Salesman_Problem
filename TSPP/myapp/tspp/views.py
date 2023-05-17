@@ -6,6 +6,8 @@ import json
 import math
 import random
 import csv
+import time
+import matplotlib.pyplot as plt
 
 from django.shortcuts import render, redirect
 from django.conf import settings
@@ -31,6 +33,9 @@ def home(request):
 
 def tspp_results(request):
     return render(request, 'tspp_results.html')
+
+def landingpage(request):
+    return render(request, 'landingpage.html')
 
 
 def mapview(request):
@@ -134,6 +139,43 @@ def solve_tsp(request):
         # Define cost of each arc
         routing.SetArcCostEvaluatorOfAllVehicles(transit_callback_index)
 
+        # # # ------------------ For MetaHeuristic solution strategy ------------------ #
+
+        # start_time = time.time()
+        # solution_curve = []
+
+        # def record_solution():
+        #     current_time = time.time() - start_time
+        #     current_cost = routing.CostVar().Max()
+        #     solution_curve.append((current_time, current_cost))
+
+        # routing.AddAtSolutionCallback(record_solution)
+
+        # # Set search parameters
+        # search_parameters = pywrapcp.DefaultRoutingSearchParameters()
+        # search_parameters.local_search_metaheuristic = (routing_enums_pb2.LocalSearchMetaheuristic.SIMULATED_ANNEALING)
+        # search_parameters.time_limit.seconds = 10
+        # search_parameters.log_search = True
+
+        # # Solve the problem
+        # solution = routing.SolveWithParameters(search_parameters)
+
+        # # Print the solution
+        # if solution:
+        #     route = []
+        #     distances = []
+        #     index = routing.Start(0)
+        #     while not routing.IsEnd(index):
+        #         route.append(locations[manager.IndexToNode(index)])
+        #         previous_index = index
+        #         index = solution.Value(routing.NextVar(index))
+        #         if not routing.IsEnd(index):
+        #             distances.append(data['distance_matrix'][previous_index][index])
+        #                         # added line
+        #     out_of_charge_points = compute_out_of_charge_points(
+        #         route, distances, capacity)
+
+
         # ------------------ For First solution strategy ------------------ #
         # Set search parameters
         search_parameters = pywrapcp.DefaultRoutingSearchParameters()
@@ -158,6 +200,8 @@ def solve_tsp(request):
             # added line
             out_of_charge_points = compute_out_of_charge_points(
                 route, distances, capacity)
+
+            # -----  finish --    #
 
             # Calculate the centroid of the out of charge points
             # https://en.wikipedia.org/wiki/Centroid
@@ -241,6 +285,31 @@ def solve_tsp(request):
             print('distances', distances)
             print('cost', total_cost)
             print('ooc-cs', total_distance)
+
+            # Unpack the solution curve into two lists: time and cost
+            # lats = [point['lat'] for point in route]
+            # lngs = [point['lng'] for point in route]
+            # time_values, cost_values = zip(*solution_curve)
+
+            # plt.figure(figsize=(10, 6))
+            # plt.plot(time_values, cost_values, marker='o')
+            # plt.title('Progress of the solver over time')                                   ## you wont to save it not show it on your website
+            # plt.xlabel('Time (seconds)')
+            # plt.ylabel('Cost in meters')
+            # plt.grid(True)
+            # plt.show()
+
+            # fig = plt.figure()
+            # ax = fig.add_subplot(111, projection='3d')
+            # # Make the z-axis to be the time or cost
+            # # Here, I'll use the index in the route list as a stand-in for time
+            # zs = range(len(route))
+
+            # ax.plot(lats, lngs, zs)
+            # ax.set_xlabel('Latitude')
+            # ax.set_ylabel('Longitude')
+            # ax.set_zlabel('Time or Cost')
+            # plt.show()
 
             return JsonResponse({
                 'route': route,
