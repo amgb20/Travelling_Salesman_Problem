@@ -34,6 +34,7 @@ def home(request):
 def tspp_results(request):
     return render(request, 'tspp_results.html')
 
+
 def landingpage(request):
     return render(request, 'landingpage.html')
 
@@ -87,6 +88,27 @@ def download_cpu_usages_csv(request, algorithm, Length, Width):
 
 # script solving the TSP problem using OR-Tools
 
+def haversine_distance(lat1, lng1, lat2, lng2):
+            # Radius of the Earth in kilometers
+                R = 6371.0
+
+                # Convert degrees to radians
+                lat1_rad = math.radians(lat1)
+                lng1_rad = math.radians(lng1)
+                lat2_rad = math.radians(lat2)
+                lng2_rad = math.radians(lng2)
+
+                # Differences
+                dlat = lat2_rad - lat1_rad
+                dlng = lng2_rad - lng1_rad
+
+                # Haversine formula
+                a = math.sin(dlat / 2)**2 + math.cos(lat1_rad) * math.cos(lat2_rad) * math.sin(dlng / 2)**2
+                c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+                distance = R * c
+
+                # Convert kilometers to meters and return
+                return distance * 1000
 
 # https://developers.google.com/optimization/routing/tsp -- this comes from directly from OR-tools a google tsp solver developed in python
 @csrf_exempt
@@ -95,9 +117,11 @@ def solve_tsp(request):
         data = json.loads(request.body)
         locations = data['locations']
         capacity = data['capacity']
+        solverTSP = data['solverTSP']
         # rectangle_bound = data['rectangle_bounds']
 
         # Create distance matrix
+        # https://developers.google.com/maps/documentation/distance-matrix/overview
         distance_matrix = []
         for location_1 in locations:  # for each location in the list of locations
             row = []
@@ -106,7 +130,8 @@ def solve_tsp(request):
                     (location_1['lat'], location_1['lng']), (location_2['lat'], location_2['lng'])).meters))  # append the distance between the two locations
             distance_matrix.append(row)
 
-            print('distance_matrix', distance_matrix)
+            # print('distance_matrix', distance_matrix)
+        # Create distance matrix using Haversine formula
 
 
         # Save distance matrix to a CSV file
@@ -139,187 +164,247 @@ def solve_tsp(request):
         # Define cost of each arc
         routing.SetArcCostEvaluatorOfAllVehicles(transit_callback_index)
 
-        # # # ------------------ For MetaHeuristic solution strategy ------------------ #
-
-        # start_time = time.time()
-        # solution_curve = []
-
-        # def record_solution():
-        #     current_time = time.time() - start_time
-        #     current_cost = routing.CostVar().Max()
-        #     solution_curve.append((current_time, current_cost))
-
-        # routing.AddAtSolutionCallback(record_solution)
-
-        # # Set search parameters
-        # search_parameters = pywrapcp.DefaultRoutingSearchParameters()
-        # search_parameters.local_search_metaheuristic = (routing_enums_pb2.LocalSearchMetaheuristic.SIMULATED_ANNEALING)
-        # search_parameters.time_limit.seconds = 10
-        # search_parameters.log_search = True
-
-        # # Solve the problem
-        # solution = routing.SolveWithParameters(search_parameters)
-
-        # # Print the solution
-        # if solution:
-        #     route = []
-        #     distances = []
-        #     index = routing.Start(0)
-        #     while not routing.IsEnd(index):
-        #         route.append(locations[manager.IndexToNode(index)])
-        #         previous_index = index
-        #         index = solution.Value(routing.NextVar(index))
-        #         if not routing.IsEnd(index):
-        #             distances.append(data['distance_matrix'][previous_index][index])
-        #                         # added line
-        #     out_of_charge_points = compute_out_of_charge_points(
-        #         route, distances, capacity)
-
-
-        # ------------------ For First solution strategy ------------------ #
         # Set search parameters
         search_parameters = pywrapcp.DefaultRoutingSearchParameters()
-        search_parameters.first_solution_strategy = (
-            routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC)
 
-        # Solve the problem
-        solution = routing.SolveWithParameters(search_parameters)
+        strategy_mapping_first_solution = {
+            'PATH_CHEAPEST_ARC':            routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC,
+            'PATH_MOST_CONSTRAINED_ARC':    routing_enums_pb2.FirstSolutionStrategy.PATH_MOST_CONSTRAINED_ARC,
+            'EVALUATOR_STRATEGY':           routing_enums_pb2.FirstSolutionStrategy.EVALUATOR_STRATEGY,
+            'SAVINGS':                      routing_enums_pb2.FirstSolutionStrategy.SAVINGS,
+            'SWEEP':                        routing_enums_pb2.FirstSolutionStrategy.SWEEP,
+            'CHRISTOFIDES':                 routing_enums_pb2.FirstSolutionStrategy.CHRISTOFIDES,
+            'ALL_UNPERFORMED':              routing_enums_pb2.FirstSolutionStrategy.ALL_UNPERFORMED,
+            'BEST_INSERTION':               routing_enums_pb2.FirstSolutionStrategy.BEST_INSERTION,
+            'PARALLEL_CHEAPEST_INSERTION':  routing_enums_pb2.FirstSolutionStrategy.PARALLEL_CHEAPEST_INSERTION,
+            'LOCAL_CHEAPEST_INSERTION':     routing_enums_pb2.FirstSolutionStrategy.LOCAL_CHEAPEST_INSERTION,
+            'GLOBAL_CHEAPEST_ARC':          routing_enums_pb2.FirstSolutionStrategy.GLOBAL_CHEAPEST_ARC,
+            'LOCAL_CHEAPEST_ARC':           routing_enums_pb2.FirstSolutionStrategy.LOCAL_CHEAPEST_ARC,
+            'FIRST_UNBOUND_MIN_VALUE':      routing_enums_pb2.FirstSolutionStrategy.FIRST_UNBOUND_MIN_VALUE,
+        }
 
-        if solution:
-            route = []
-            distances = []
-            index = routing.Start(0)
-            while not routing.IsEnd(index):
-                route.append(locations[manager.IndexToNode(index)])
-                previous_index = index
-                index = solution.Value(routing.NextVar(index))
-                if not routing.IsEnd(index):
-                    distances.append(data['distance_matrix']
-                                     [previous_index][index])
+        strategy_mapping_metaheuristic = {
+            'GREEDY_DESCENT':       routing_enums_pb2.LocalSearchMetaheuristic.GREEDY_DESCENT,
+            'GUIDED_LOCAL_SEARCH':  routing_enums_pb2.LocalSearchMetaheuristic.GUIDED_LOCAL_SEARCH,
+            'SIMULATED_ANNEALING':  routing_enums_pb2.LocalSearchMetaheuristic.SIMULATED_ANNEALING,
+            'TABU_SEARCH':          routing_enums_pb2.LocalSearchMetaheuristic.TABU_SEARCH,
+            'GENERIC_TABU_SEARCH':  routing_enums_pb2.LocalSearchMetaheuristic.GENERIC_TABU_SEARCH,
+        }
 
-            # added line
-            out_of_charge_points = compute_out_of_charge_points(
-                route, distances, capacity)
+        print('solverTSP', solverTSP)
 
-            # -----  finish --    #
 
-            # Calculate the centroid of the out of charge points
-            # https://en.wikipedia.org/wiki/Centroid
-            # def calculate_centroid(points):
-            #     lats = [p['lat'] for p in points]
-            #     lngs = [p['lng'] for p in points]
-            #     centroid = {'lat': sum(lats) / len(points), 'lng': sum(lngs) / len(points)}
-            #     return centroid
-            # https://stackoverflow.com/questions/2792443/finding-the-centroid-of-a-polygon
+        if solverTSP in strategy_mapping_first_solution:
 
-            def calculate_polygon_centroid(points):
-                # if points is inferior or equal to 4, then the centroid is the average of the points
-                if len(points) <= 4:
-                    lats = [p['lat'] for p in points]
-                    lngs = [p['lng'] for p in points]
-                    centroid = {'lat': sum(
-                        lats) / len(points), 'lng': sum(lngs) / len(points)}
-                    return centroid
-                else:
-                    area = 0.0
-                    x_center = 0.0
-                    y_center = 0.0
+            # ------------------ For First solution strategy ------------------ #
+            # Use the selected algoTSP to get the strategy
+            strategy = strategy_mapping_first_solution.get(solverTSP)
 
-                    a = len(points)
-                    # repeat the first point to create a 'closed loop'
-                    points = points + [points[0]]
+            search_parameters.first_solution_strategy = strategy
 
-                    for i in range(a):
-                        xi, yi = points[i]['lat'], points[i]['lng']
-                        xi1, yi1 = points[i + 1]['lat'], points[i + 1]['lng']
+            start_time = time.time()
 
-                        # calculate the signed area contribution of the current point
-                        fi = xi * yi1 - xi1 * yi
-                        area += fi
-                        x_center += (xi + xi1) * fi
-                        y_center += (yi + yi1) * fi
+            # Solve the problem
+            solution = routing.SolveWithParameters(search_parameters)
 
-                    area *= 0.5
+            solving_time = time.time() - start_time ### INTEGRATE THATTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
 
-                    if area == 0.0:
-                        return None
+            if solution:
+                route = []
+                distances = []
+                index = routing.Start(0)
+                while not routing.IsEnd(index):
+                    route.append(locations[manager.IndexToNode(index)])
+                    previous_index = index
+                    index = solution.Value(routing.NextVar(index))
+                    if not routing.IsEnd(index):
+                        distances.append(data['distance_matrix']
+                                         [previous_index][index])
 
-                    x_center /= (6.0 * area)
-                    y_center /= (6.0 * area)
+                # added line
+                out_of_charge_points = compute_out_of_charge_points(
+                    route, distances, capacity)
+                
+                print('distances2', sum(distances))
 
-                    return {'lat': x_center, 'lng': y_center}
+                # -----  finish --    #
 
-            charging_station_location = calculate_polygon_centroid(
-                out_of_charge_points)
+        elif solverTSP in strategy_mapping_metaheuristic:
+                # # # ------------------ For MetaHeuristic solution strategy ------------------ #
+            strategy = strategy_mapping_metaheuristic.get(solverTSP)
 
-            # Calculate the total cost by summing the distances
-            total_cost = sum(distances)
+            search_parameters.local_search_metaheuristic = strategy
 
-            def calculate_distance(point1, point2):
-                lat1 = radians(point1['lat'])
-                lon1 = radians(point1['lng'])
-                lat2 = radians(point2['lat'])
-                lon2 = radians(point2['lng'])
+            start_time = time.time()
+            solution_curve = []
 
-                # Radius of the Earth in kilometers
-                earth_radius = 6371.0
+            def record_solution():
+                current_time = time.time() - start_time
+                current_cost = routing.CostVar().Max()
+                solution_curve.append((current_time, current_cost))
 
-                # Haversine formula
-                dlon = lon2 - lon1
-                dlat = lat2 - lat1
-                a = sin(dlat / 2)**2 + cos(lat1) * cos(lat2) * sin(dlon / 2)**2
-                c = 2 * atan2(sqrt(a), sqrt(1 - a))
-                distance = earth_radius * c
 
-                return distance*2
+            routing.AddAtSolutionCallback(record_solution)
 
-            # Calculate the total distance from each out_of_charge point to the charging station
-            total_distance = 0.0
-            for point in out_of_charge_points:
-                distance_to_charging_station = calculate_distance(
-                    point, charging_station_location)
-                total_distance += distance_to_charging_station
+            # Set search parameters
+            # search_parameters = pywrapcp.DefaultRoutingSearchParameters()
+            # search_parameters.local_search_metaheuristic = (
+            #     routing_enums_pb2.LocalSearchMetaheuristic.search_parameters)
+            search_parameters.time_limit.seconds = 10
+            search_parameters.log_search = True
 
-            print('out_of_charge_points', out_of_charge_points)
-            print('charging_station_location', charging_station_location)
-            print('distances', distances)
-            print('cost', total_cost)
-            print('ooc-cs', total_distance)
+            # Solve the problem
+            solution = routing.SolveWithParameters(search_parameters)
 
+            print('solution', solution)
+
+            # Print the solution distance matrix
+            if solution:
+                route = []
+                distances = []
+                index = routing.Start(0)
+                while not routing.IsEnd(index):
+                    route.append(locations[manager.IndexToNode(index)])
+                    previous_index = index
+                    index = solution.Value(routing.NextVar(index))
+                    if not routing.IsEnd(index):
+                        distances.append(
+                            data['distance_matrix'][previous_index][index])
+                
+                out_of_charge_points = compute_out_of_charge_points(
+                    route, distances, capacity)
+                
+            # print the solution distance harvesine
+            # if solution:
+            #     route = []
+            #     haversine_distances = []
+            #     index = routing.Start(0)
+            #     while not routing.IsEnd(index):
+            #         route.append(locations[manager.IndexToNode(index)])
+            #         previous_index = index
+            #         index = solution.Value(routing.NextVar(index))
+            #         if len(route) > 1 and not routing.IsEnd(index):
+            #             haversine_distances.append(
+            #                 haversine_distance(route[-2]['lat'], route[-2]['lng'], 
+            #                                 route[-1]['lat'], route[-1]['lng']))
+                            
+            #     out_of_charge_points = compute_out_of_charge_points(route, haversine_distances, capacity)
+                
             # Unpack the solution curve into two lists: time and cost
-            # lats = [point['lat'] for point in route]
-            # lngs = [point['lng'] for point in route]
-            # time_values, cost_values = zip(*solution_curve)
+            if solution_curve:
+                time_values, cost_values = zip(*solution_curve)
+                print('cost_values', cost_values)
+            else:
+                time_values, cost_values = [], []
 
-            # plt.figure(figsize=(10, 6))
-            # plt.plot(time_values, cost_values, marker='o')
-            # plt.title('Progress of the solver over time')                                   ## you wont to save it not show it on your website
-            # plt.xlabel('Time (seconds)')
-            # plt.ylabel('Cost in meters')
-            # plt.grid(True)
-            # plt.show()
+            # divisor = 0.9946632105
+
+            # cost_values = [cost*divisor for cost in cost_values]
+
+            plt.figure(figsize=(10, 6))
+            plt.plot(time_values, cost_values, marker='o')
+            plt.title('Progress of the solver over time')
+            plt.xlabel('Time (seconds)')
+            plt.ylabel('Haversine Distance (meters)')
+            plt.grid(True)
+            plt.show()
+
 
             # fig = plt.figure()
             # ax = fig.add_subplot(111, projection='3d')
             # # Make the z-axis to be the time or cost
             # # Here, I'll use the index in the route list as a stand-in for time
             # zs = range(len(route))
-
             # ax.plot(lats, lngs, zs)
             # ax.set_xlabel('Latitude')
             # ax.set_ylabel('Longitude')
             # ax.set_zlabel('Time or Cost')
             # plt.show()
+                
+        else:
+            print('solverTSP not found')
+            
+        # Calculate the centroid of the out of charge points
+        # https://en.wikipedia.org/wiki/Centroid
+        # def calculate_centroid(points):
+        #     lats = [p['lat'] for p in points]
+        #     lngs = [p['lng'] for p in points]
+        #     centroid = {'lat': sum(lats) / len(points), 'lng': sum(lngs) / len(points)}
+        #     return centroid
+        # https://stackoverflow.com/questions/2792443/finding-the-centroid-of-a-polygon
 
-            return JsonResponse({
-                'route': route,
-                'distances': distances,
-                'cost': total_cost,
-                'out_of_charge_points': out_of_charge_points,
-                'charging_station_location': charging_station_location,
-            })
+        def calculate_polygon_centroid(points):
+            # if points is inferior or equal to 4, then the centroid is the average of the points
+            if len(points) <= 4:
+                lats = [p['lat'] for p in points]
+                lngs = [p['lng'] for p in points]
+                centroid = {'lat': sum(
+                    lats) / len(points), 'lng': sum(lngs) / len(points)}
+                return centroid
+            else:
+                area = 0.0
+                x_center = 0.0
+                y_center = 0.0
+                a = len(points)
+                # repeat the first point to create a 'closed loop'
+                points = points + [points[0]]
+                for i in range(a):
+                    xi, yi = points[i]['lat'], points[i]['lng']
+                    xi1, yi1 = points[i + 1]['lat'], points[i + 1]['lng']
+                    # calculate the signed area contribution of the current point
+                    fi = xi * yi1 - xi1 * yi
+                    area += fi
+                    x_center += (xi + xi1) * fi
+                    y_center += (yi + yi1) * fi
+                area *= 0.5
+                if area == 0.0:
+                    return None
+                x_center /= (6.0 * area)
+                y_center /= (6.0 * area)
+                return {'lat': x_center, 'lng': y_center}
+        charging_station_location = calculate_polygon_centroid(
+            out_of_charge_points)
+        
+        # Calculate the total cost by summing the distances
+        total_cost = sum(distances)
+
+        def calculate_distance(point1, point2):
+            lat1 = radians(point1['lat'])
+            lon1 = radians(point1['lng'])
+            lat2 = radians(point2['lat'])
+            lon2 = radians(point2['lng'])
+            # Radius of the Earth in kilometers
+            earth_radius = 6371.0
+            # Haversine formula
+            dlon = lon2 - lon1
+            dlat = lat2 - lat1
+            a = sin(dlat / 2)**2 + cos(lat1) * cos(lat2) * sin(dlon / 2)**2
+            c = 2 * atan2(sqrt(a), sqrt(1 - a))
+            distance = earth_radius * c
+            return distance*2
+        # Calculate the total distance from each out_of_charge point to the charging station
+        total_distance = 0.0
+        for point in out_of_charge_points:
+            distance_to_charging_station = calculate_distance(
+                point, charging_station_location)
+            total_distance += distance_to_charging_station
+        print('out_of_charge_points', out_of_charge_points)
+        print('charging_station_location', charging_station_location)
+        print('distances', distances)
+        print('cost', total_cost)
+        print('ooc-cs', total_distance)
+
+        return JsonResponse({
+            'route': route,
+            'distances': distances,
+            'cost': total_cost,
+            'out_of_charge_points': out_of_charge_points,
+            'charging_station_location': charging_station_location,
+            'first_solution_time': solving_time,
+        })
 
     return JsonResponse({'error': 'Invalid request'}, status=400)
+
 
 class IterationMonitor(pywrapcp.SearchMonitor):
     def __init__(self, solver, routing, manager, data):
@@ -335,7 +420,8 @@ class IterationMonitor(pywrapcp.SearchMonitor):
         index = self.routing.Start(0)
         cost = 0
         while not self.routing.IsEnd(index):
-            cost += self.data['distance_matrix'][self.manager.IndexToNode(index)][self.manager.IndexToNode(self.routing.NextVar(index).Value())]
+            cost += self.data['distance_matrix'][self.manager.IndexToNode(
+                index)][self.manager.IndexToNode(self.routing.NextVar(index).Value())]
             index = self.routing.NextVar(index).Value()
         self.iterations.append(self.solver().iterations())
         self.costs.append(cost)
