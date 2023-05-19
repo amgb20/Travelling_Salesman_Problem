@@ -193,6 +193,9 @@ def solve_tsp(request):
 
         print('solverTSP', solverTSP)
 
+        out_of_charge_points = None
+        # distances = None
+
 
         if solverTSP in strategy_mapping_first_solution:
 
@@ -250,7 +253,7 @@ def solve_tsp(request):
             # search_parameters = pywrapcp.DefaultRoutingSearchParameters()
             # search_parameters.local_search_metaheuristic = (
             #     routing_enums_pb2.LocalSearchMetaheuristic.search_parameters)
-            search_parameters.time_limit.seconds = 10
+            search_parameters.time_limit.seconds = 120
             search_parameters.log_search = True
 
             # Solve the problem
@@ -293,9 +296,19 @@ def solve_tsp(request):
             # Unpack the solution curve into two lists: time and cost
             if solution_curve:
                 time_values, cost_values = zip(*solution_curve)
-                print('cost_values', cost_values)
             else:
                 time_values, cost_values = [], []
+
+            rows = [{'time': t, 'cost': c} for t, c in zip(time_values, cost_values)]
+
+            filename = 'MetaData.csv'
+            with open(filename, 'w', newline='') as file:
+                fieldnames = ['time', 'cost']
+                writer = csv.DictWriter(file, fieldnames=fieldnames)
+
+                writer.writeheader()
+                for row in rows:
+                    writer.writerow(row)
 
             # divisor = 0.9946632105
 
@@ -362,7 +375,9 @@ def solve_tsp(request):
                 x_center /= (6.0 * area)
                 y_center /= (6.0 * area)
                 return {'lat': x_center, 'lng': y_center}
-        charging_station_location = calculate_polygon_centroid(
+            
+        if out_of_charge_points is not None:
+                charging_station_location = calculate_polygon_centroid(
             out_of_charge_points)
         
         # Calculate the total cost by summing the distances
@@ -400,7 +415,7 @@ def solve_tsp(request):
             'cost': total_cost,
             'out_of_charge_points': out_of_charge_points,
             'charging_station_location': charging_station_location,
-            'first_solution_time': solving_time,
+            # 'first_solution_time': solving_time,
         })
 
     return JsonResponse({'error': 'Invalid request'}, status=400)
