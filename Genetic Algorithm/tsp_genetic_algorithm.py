@@ -1,29 +1,15 @@
-# add the number for each points
-# create a grid
-# do the tracing live
-# set km as the unit
-# set one agent (robot)
-# set its position on the map
-# create a more sexy gui with every type of method --> FOLLOW what i did with simple grid
-
 import numpy as np
 import matplotlib.pyplot as plt
+import csv
 
-# Generate random waypoints
-def generate_waypoints(num_waypoints):
-    return np.random.rand(num_waypoints, 2) 
+def load_distance_matrix():
+    csv_file = 'distance_matrix_TSP20.csv'
+    with open(csv_file, 'r') as file:
+        csv_reader = csv.reader(file)
+        data = list(csv_reader)
+        dist_mat = np.array(data, dtype=int)
+    return dist_mat
 
-# Calculate distance matrix
-def calculate_distance_matrix(waypoints):
-    num_waypoints = len(waypoints)
-    distance_matrix = np.zeros((num_waypoints, num_waypoints))
-    for i in range(num_waypoints):
-        for j in range(num_waypoints):
-            if i != j:
-                distance_matrix[i, j] = np.linalg.norm(waypoints[i] - waypoints[j])
-    return distance_matrix
-
-# Create initial population
 def create_initial_population(num_individuals, num_waypoints):
     population = []
     for _ in range(num_individuals):
@@ -31,20 +17,17 @@ def create_initial_population(num_individuals, num_waypoints):
         population.append(individual)
     return np.array(population)
 
-# Calculate total distance of a route
 def route_distance(individual, distance_matrix):
     distance = 0
     for i in range(len(individual)):
         distance += distance_matrix[individual[i-1], individual[i]]
     return distance
 
-# Tournament selection
 def tournament_selection(population, fitness, k=2):
     selected_indices = np.random.choice(len(population), k)
     best_index = selected_indices[np.argmin(fitness[selected_indices])]
     return population[best_index]
 
-# Ordered crossover
 def ordered_crossover(parent1, parent2):
     size = len(parent1)
     start, end = np.random.choice(size, 2, replace=False)
@@ -62,7 +45,6 @@ def ordered_crossover(parent1, parent2):
 
     return child1
 
-# Swap mutation
 def swap_mutation(individual, mutation_rate):
     mutated_individual = np.copy(individual)
     for i in range(len(individual)):
@@ -71,16 +53,17 @@ def swap_mutation(individual, mutation_rate):
             mutated_individual[i], mutated_individual[swap_index] = mutated_individual[swap_index], mutated_individual[i]
     return mutated_individual
 
-# Genetic algorithm
-def genetic_algorithm(waypoints, num_individuals=100, num_generations=1000, mutation_rate=0.1, k=2):
-    distance_matrix = calculate_distance_matrix(waypoints)
-    population = create_initial_population(num_individuals, len(waypoints))
+def genetic_algorithm(distance_matrix, num_individuals=100, num_generations=1000, mutation_rate=0.1, k=2):
+    num_waypoints = distance_matrix.shape[0]
+    population = create_initial_population(num_individuals, num_waypoints)
     
     best_individual = None
     best_fitness = float('inf')
-    
+    avg_distances = []  # Record average distances for each generation
+
     for _ in range(num_generations):
         fitness = np.array([route_distance(individual, distance_matrix) for individual in population])
+        avg_distances.append(np.mean(fitness))
 
         if fitness.min() < best_fitness:
             best_fitness = fitness.min()
@@ -99,34 +82,33 @@ def genetic_algorithm(waypoints, num_individuals=100, num_generations=1000, muta
 
         population = np.array(new_population)
 
-    return best_individual, best_fitness
+        # Plotting the average distance of the population in real-time
+        plt.figure(1)  # Use a single figure, you don't need to create a new one every time
+        plt.clf()  # Clear the figure
+        plt.plot(avg_distances)
+        plt.title('Average Distance by Generation')
+        plt.xlabel('Generation')
+        plt.ylabel('Average Distance')
+        plt.grid()
+        plt.draw()  # Update the plot
+        plt.pause(0.01)  # Small pause to allow the plot to update
 
-# Visualize the best route
-def visualize_route(waypoints, best_individual):
-    ordered_waypoints = waypoints[best_individual]
 
-    plt.figure(figsize=(10, 5))
-    plt.plot(ordered_waypoints[:, 0], ordered_waypoints[:, 1], 'o-', lw=2)
-    plt.xlabel("x")
-    plt.ylabel("y")
-    plt.title("Best route found by genetic algorithm")
-    plt.show()
+    return best_individual, best_fitness, avg_distances
 
-# Main function
 def main():
     np.random.seed(42)
     
-    num_waypoints = 100
     num_individuals = 100
     num_generations = 1000
     mutation_rate = 0.1
     k = 2
 
-    waypoints = generate_waypoints(num_waypoints)
-    best_individual, best_fitness = genetic_algorithm(waypoints, num_individuals, num_generations, mutation_rate, k)
+    distance_matrix = load_distance_matrix()
+    best_individual, best_fitness, avg_distances = genetic_algorithm(distance_matrix, num_individuals, num_generations, mutation_rate, k)
 
     print("Best route found has a distance of:", best_fitness)
-    visualize_route(waypoints, best_individual)
+    plt.show()
 
 if __name__ == "__main__":
     main()
