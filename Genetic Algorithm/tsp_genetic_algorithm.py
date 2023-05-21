@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import csv
 
 def load_distance_matrix():
-    csv_file = 'distance_matrix_TSP20.csv'
+    csv_file = 'distance_matrix_TSP50.csv'
     with open(csv_file, 'r') as file:
         csv_reader = csv.reader(file)
         data = list(csv_reader)
@@ -63,7 +63,7 @@ def genetic_algorithm(distance_matrix, num_individuals=100, num_generations=1000
 
     for _ in range(num_generations):
         fitness = np.array([route_distance(individual, distance_matrix) for individual in population])
-        avg_distances.append(np.mean(fitness))
+        avg_distances.append(np.min(fitness))
 
         if fitness.min() < best_fitness:
             best_fitness = fitness.min()
@@ -86,12 +86,12 @@ def genetic_algorithm(distance_matrix, num_individuals=100, num_generations=1000
         plt.figure(1)  # Use a single figure, you don't need to create a new one every time
         plt.clf()  # Clear the figure
         plt.plot(avg_distances)
-        plt.title('Average Distance by Generation')
+        plt.title('Best Distance by Generation')
         plt.xlabel('Generation')
-        plt.ylabel('Average Distance')
+        plt.ylabel('Minimum Distance')
         plt.grid()
         plt.draw()  # Update the plot
-        plt.pause(0.01)  # Small pause to allow the plot to update
+        plt.pause(0.0001)  # Small pause to allow the plot to update
 
 
     return best_individual, best_fitness, avg_distances
@@ -100,9 +100,9 @@ def main():
     np.random.seed(42)
     
     num_individuals = 100
-    num_generations = 1000
-    mutation_rate = 0.1
-    k = 2
+    num_generations = 1200
+    mutation_rate = 0.0008
+    k = 100
 
     distance_matrix = load_distance_matrix()
     best_individual, best_fitness, avg_distances = genetic_algorithm(distance_matrix, num_individuals, num_generations, mutation_rate, k)
