@@ -59,6 +59,20 @@ python3 manage.py runserver 8080
 # This is a snippet video of the user interface
 ![alt text](/TSPP/website.gif "User Interface")
 
-
+If you are using the code please cite:
+`
+@article{Benoit_2024,
+   title={Navigating Intelligence: A Survey of Google OR‐Tools and Machine Learning for Global Path Planning in Autonomous Vehicles},
+   volume={6},
+   ISSN={2640-4567},
+   url={http://dx.doi.org/10.1002/aisy.202300840},
+   DOI={10.1002/aisy.202300840},
+   number={9},
+   journal={Advanced Intelligent Systems},
+   publisher={Wiley},
+   author={Benoit, Alexandre and Asef, Pedram},
+   year={2024},
+   month=aug }
+`
 
 
